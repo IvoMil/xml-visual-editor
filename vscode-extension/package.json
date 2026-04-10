@@ -24,6 +24,10 @@
     "type": "git",
     "url": "https://github.com/IvoMil/xml-visual-editor"
   },
+  "homepage": "https://github.com/IvoMil/xml-visual-editor#readme",
+  "bugs": {
+    "url": "https://github.com/IvoMil/xml-visual-editor/issues"
+  },
   "activationEvents": [
     "onLanguage:xml"
   ],

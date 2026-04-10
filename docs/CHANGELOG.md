@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [0.5.1] - 2026-04-10
 
 ### Added — Phase 5a: Open-Source Dual-Repo Setup
-- **Dual-repo architecture**: Private working repo (`IvoMil/xml-visual-editor-private`) + public mirror (`IvoMil/xml-visual-editor`) with filtered sync
+- **Dual-repo architecture**: Private working repo + public open-source mirror (`IvoMil/xml-visual-editor`) with filtered sync
 - **Repo-sync skill** (`.github/skills/repo-sync/SKILL.md`): Documents dual-repo architecture, sync procedures, external PR integration
 - **Repo-sync-manager agent** (`.github/agents/repo-sync-manager.agent.md`): Handles sync operations, conflict resolution, public repo management
 - **`.publicignore` file**: Defines private-only patterns excluded from public sync (agents, skills, plans, resources, references, internal docs)
@@ -24,6 +24,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`feature-development-protocol` skill**: Added Phase 5 public sync step
 - **`workflow-orchestrator` agent**: Added Phase 5 sync workflow and repo-sync-manager awareness
 - **`vscode-extension/README.md`**: Updated 8 screenshot URLs from `xml-visual-editor-assets` repo to `xml-visual-editor` public repo path
+- **`README.md`**: Removed links to private-only docs (PROJECT_PLAN.md, SKILLS.md), fixed clone URL from SSH alias to HTTPS, added CONTRIBUTING.md link, updated project structure
+
+### Fixed
+- **Sync script encoding**: Replaced non-ASCII characters (box-drawing `─`, em dash `—`) with ASCII equivalents for PowerShell 5.1 compatibility
 
 ## [0.5.0] - 2026-03-27
 

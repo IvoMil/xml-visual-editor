@@ -2,7 +2,7 @@
   "name": "xml-visual-editor",
   "displayName": "XML Visual Editor",
   "description": "Advanced XML editing with XSD schema-aware validation, completions, and interactive helper panels",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "publisher": "IvoSoft",
   "icon": "resources/icons/icon.png",
   "preview": true,

@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [0.5.1] - 2026-04-10
+## [0.5.0] - 2026-04-10
 
 ### Added — Phase 5a: Open-Source Dual-Repo Setup
 - **Dual-repo architecture**: Private working repo + public open-source mirror (`IvoMil/xml-visual-editor`) with filtered sync

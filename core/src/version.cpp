@@ -3,7 +3,7 @@
 namespace xve {
 
 auto version() -> const char* {
-    return "0.1.0";
+    return "0.5.0";
 }
 
 }  // namespace xve

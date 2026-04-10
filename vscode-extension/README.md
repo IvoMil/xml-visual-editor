@@ -2,7 +2,7 @@
 
 Multi-platform toolkit for advanced XSD schema-aware XML editing.
 
-> **Preview Release (v0.4.1)** — This extension is in active development. Features are functional but the API may change. Feedback and bug reports are welcome!
+> **Preview Release (v0.5.0)** — This extension is in active development. Features are functional but the API may change. Feedback and bug reports are welcome!
 
 ![XML Visual Editor overview](https://raw.githubusercontent.com/IvoMil/xml-visual-editor/main/vscode-extension/resources/screenshots/schema-aware-editing.gif)
 

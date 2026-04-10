@@ -104,7 +104,7 @@ See [Project Plan](docs/PROJECT_PLAN.md) for the full roadmap (Phases 1–7).
 
 ```bash
 # Clone
-git clone git@github.com-personal:IvoMil/xml-visual-editor.git
+git clone https://github.com/IvoMil/xml-visual-editor.git
 cd xml-visual-editor
 
 # Configure (requires VCPKG_ROOT environment variable)
@@ -129,9 +129,8 @@ xml-visual-editor/
 ├── notepad-plus-plus/       → Notepad++ plugin (C++ DLL, Windows)
 ├── cli/                     → CLI tools (standalone binaries)
 ├── docs/                    → Documentation
-├── resources/               → Sample XSD/XML files
 ├── scripts/                 → Quality check scripts
-├── .github/                 → Agents, skills, CI workflows
+├── .github/                 → CI workflows, issue templates
 ├── CMakeLists.txt           → Root build configuration
 ├── vcpkg.json               → Package dependencies
 └── CMakePresets.json        → Build presets
@@ -141,9 +140,8 @@ xml-visual-editor/
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Coding Standards](docs/CODING_STANDARDS.md)
-- [Project Plan](docs/PROJECT_PLAN.md)
-- [Skills & Agents](docs/SKILLS.md)
 - [Changelog](docs/CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## Quality Checks
 

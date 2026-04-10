@@ -1,0 +1,59 @@
+# Build output
+build/
+out/
+cmake-build-*/
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.sln
+*.vcxproj*
+
+# vcpkg
+vcpkg_installed/
+
+# Compiled
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.exe
+*.pdb
+
+# VS Code extension
+vscode-extension/node_modules/
+vscode-extension/out/
+vscode-extension/.vscode-test/
+vscode-extension/bin/
+
+# Reference project (read-only copy of Python predecessor)
+reference_project/
+vscode-extension/*.vsix
+
+# Resource schemas (local analysis only, not committed)
+resources/Delft_FEWS_schemas/
+
+# Notepad++ plugin
+notepad-plus-plus/*.dll
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Coverage
+*.gcda
+*.gcno
+*.gcov
+coverage/
+
+# Build/test log artifacts
+build_stderr.txt
+build_stdout.txt
+test_stderr.txt
+test_stdout.txt

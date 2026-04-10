@@ -1,0 +1,576 @@
+{
+  "name": "xml-visual-editor",
+  "displayName": "XML Visual Editor",
+  "description": "Advanced XML editing with XSD schema-aware validation, completions, and interactive helper panels",
+  "version": "0.4.1",
+  "publisher": "IvoSoft",
+  "icon": "resources/icons/icon.png",
+  "preview": true,
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Formatters",
+    "Linters"
+  ],
+  "keywords": ["xml", "xsd", "schema", "validation", "editor", "formatting", "xpath", "intellisense"],
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IvoMil/xml-visual-editor"
+  },
+  "activationEvents": [
+    "onLanguage:xml"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "xmlvisualeditor-helpers",
+          "title": "XML Visual Editor",
+          "icon": "resources/icons/xve-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "xmlvisualeditor-helpers": [
+        {
+          "id": "xmlvisualeditor.actionsPanel",
+          "name": "XML Actions",
+          "type": "webview",
+          "when": "xmlvisualeditor.isXmlFileOpen"
+        },
+        {
+          "id": "xmlvisualeditor.elementsPanel",
+          "name": "Elements",
+          "type": "webview",
+          "icon": "$(list-tree)",
+          "when": "xmlvisualeditor.isXmlFileOpen"
+        },
+        {
+          "id": "xmlvisualeditor.attributesPanel",
+          "name": "Attributes",
+          "type": "webview",
+          "icon": "$(symbol-property)",
+          "when": "xmlvisualeditor.isXmlFileOpen"
+        },
+        {
+          "id": "xmlvisualeditor.infoPanel",
+          "name": "Info",
+          "type": "webview",
+          "icon": "$(info)",
+          "when": "xmlvisualeditor.isXmlFileOpen"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "xmlVisualEditor.contextMenu",
+        "label": "XML Visual Editor"
+      }
+    ],
+    "commands": [
+      {
+        "command": "xmlVisualEditor.validateDocument",
+        "title": "XML Visual Editor: Validate Document",
+        "icon": "$(check-all)"
+      },
+      {
+        "command": "xmlVisualEditor.checkWellFormedness",
+        "title": "XML Visual Editor: Check Well-Formedness",
+        "icon": "$(check)"
+      },
+      {
+        "command": "xmlVisualEditor.validateSchema",
+        "title": "XML Visual Editor: Validate Against Schema"
+      },
+      {
+        "command": "xmlVisualEditor.loadSchema",
+        "title": "XML Visual Editor: Load XSD Schema",
+        "icon": "$(file-add)"
+      },
+      {
+        "command": "xmlVisualEditor.openSettings",
+        "title": "XML Visual Editor: Open Settings",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleInsertRequired",
+        "title": "Insert Required: OFF",
+        "icon": "$(circle-outline)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleInsertRequiredActive",
+        "title": "Insert Required: ON",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleFilter",
+        "title": "XML Visual Editor: Filter",
+        "icon": "$(search)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleFilterActive",
+        "title": "XML Visual Editor: Hide Filter",
+        "icon": "$(search-stop)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleDocColumn",
+        "title": "XML Visual Editor: Documentation",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleDocColumnHidden",
+        "title": "XML Visual Editor: Show Documentation",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleTypeColumn",
+        "title": "XML Visual Editor: Type",
+        "icon": "$(symbol-class)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleTypeColumnHidden",
+        "title": "XML Visual Editor: Show Type",
+        "icon": "$(circle-slash)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleAttrDocColumn",
+        "title": "XML Visual Editor: Attr Documentation",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleAttrDocColumnHidden",
+        "title": "XML Visual Editor: Show Attr Documentation",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleAttrTypeColumn",
+        "title": "XML Visual Editor: Attr Type",
+        "icon": "$(symbol-class)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleAttrTypeColumnHidden",
+        "title": "XML Visual Editor: Show Attr Type",
+        "icon": "$(circle-slash)"
+      },
+      {
+        "command": "xmlVisualEditor.expandAll",
+        "title": "XML Visual Editor: Expand All",
+        "icon": "$(expand-all)"
+      },
+      {
+        "command": "xmlVisualEditor.collapseAll",
+        "title": "XML Visual Editor: Collapse All",
+        "icon": "$(collapse-all)"
+      },
+      {
+        "command": "xmlVisualEditor.prettyPrint",
+        "title": "XML Visual Editor: Pretty-Print",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "xmlVisualEditor.linearize",
+        "title": "XML Visual Editor: Linearize",
+        "icon": "$(dash)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleAutoClose",
+        "title": "Auto-Close Tags: OFF",
+        "icon": "$(tag)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleAutoCloseActive",
+        "title": "Auto-Close Tags: ON",
+        "icon": "$(bracket)"
+      },
+      {
+        "command": "xmlVisualEditor.stripWhitespace",
+        "title": "XML Visual Editor: Strip Whitespace",
+        "icon": "$(whitespace)"
+      },
+      {
+        "command": "xmlVisualEditor.copyXmlPath",
+        "title": "XML Visual Editor: Copy XML Path",
+        "icon": "$(symbol-structure)"
+      },
+      {
+        "command": "xmlVisualEditor.copyXmlPathWithPredicates",
+        "title": "XML Visual Editor: Copy XML Path with Predicates",
+        "icon": "$(symbol-numeric)"
+      },
+      {
+        "command": "xmlVisualEditor.selectCurrentElement",
+        "title": "XML Visual Editor: Select Current Element",
+        "icon": "$(selection)"
+      },
+      {
+        "command": "xmlVisualEditor.goToMatchingTag",
+        "title": "XML Visual Editor: Go to Matching Tag",
+        "icon": "$(arrow-swap)"
+      },
+      {
+        "command": "xmlVisualEditor.expandSelfClosingTag",
+        "title": "Expand Self-Closing Tag",
+        "category": "XML Visual Editor",
+        "icon": "$(unfold)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "xmlVisualEditor.contextMenu",
+          "when": "editorLangId == xml",
+          "group": "1_modification"
+        }
+      ],
+      "xmlVisualEditor.contextMenu": [
+        {
+          "command": "xmlVisualEditor.copyXmlPath",
+          "group": "1_xpath@1"
+        },
+        {
+          "command": "xmlVisualEditor.copyXmlPathWithPredicates",
+          "group": "1_xpath@2"
+        },
+        {
+          "command": "xmlVisualEditor.prettyPrint",
+          "group": "2_format@1"
+        },
+        {
+          "command": "xmlVisualEditor.linearize",
+          "group": "2_format@2"
+        },
+        {
+          "command": "xmlVisualEditor.stripWhitespace",
+          "group": "2_format@3"
+        },
+        {
+          "command": "xmlVisualEditor.checkWellFormedness",
+          "group": "3_validate@1"
+        },
+        {
+          "command": "xmlVisualEditor.validateDocument",
+          "group": "3_validate@2"
+        },
+        {
+          "command": "xmlVisualEditor.selectCurrentElement",
+          "group": "4_navigate@1"
+        },
+        {
+          "command": "xmlVisualEditor.goToMatchingTag",
+          "group": "4_navigate@2"
+        },
+        {
+          "command": "xmlVisualEditor.expandSelfClosingTag",
+          "group": "4_navigate@3"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "xmlVisualEditor.toggleFilter",
+          "when": "view == xmlvisualeditor.elementsPanel && !xmlvisualeditor.filterActive",
+          "group": "navigation@1"
+        },
+        {
+          "command": "xmlVisualEditor.toggleFilterActive",
+          "when": "view == xmlvisualeditor.elementsPanel && xmlvisualeditor.filterActive",
+          "group": "navigation@1"
+        },
+        {
+          "command": "xmlVisualEditor.toggleDocColumn",
+          "when": "view == xmlvisualeditor.elementsPanel && xmlvisualeditor.docColumnVisible",
+          "group": "navigation@2"
+        },
+        {
+          "command": "xmlVisualEditor.toggleDocColumnHidden",
+          "when": "view == xmlvisualeditor.elementsPanel && !xmlvisualeditor.docColumnVisible",
+          "group": "navigation@2"
+        },
+        {
+          "command": "xmlVisualEditor.toggleTypeColumn",
+          "when": "view == xmlvisualeditor.elementsPanel && xmlvisualeditor.typeColumnVisible",
+          "group": "navigation@3"
+        },
+        {
+          "command": "xmlVisualEditor.toggleTypeColumnHidden",
+          "when": "view == xmlvisualeditor.elementsPanel && !xmlvisualeditor.typeColumnVisible",
+          "group": "navigation@3"
+        },
+        {
+          "command": "xmlVisualEditor.toggleAttrDocColumn",
+          "when": "view == xmlvisualeditor.attributesPanel && xmlvisualeditor.attrDocColumnVisible",
+          "group": "navigation@1"
+        },
+        {
+          "command": "xmlVisualEditor.toggleAttrDocColumnHidden",
+          "when": "view == xmlvisualeditor.attributesPanel && !xmlvisualeditor.attrDocColumnVisible",
+          "group": "navigation@1"
+        },
+        {
+          "command": "xmlVisualEditor.toggleAttrTypeColumn",
+          "when": "view == xmlvisualeditor.attributesPanel && xmlvisualeditor.attrTypeColumnVisible",
+          "group": "navigation@2"
+        },
+        {
+          "command": "xmlVisualEditor.toggleAttrTypeColumnHidden",
+          "when": "view == xmlvisualeditor.attributesPanel && !xmlvisualeditor.attrTypeColumnVisible",
+          "group": "navigation@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "xmlVisualEditor.toggleFilter",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleFilterActive",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleDocColumn",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleDocColumnHidden",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleTypeColumn",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleTypeColumnHidden",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleAttrDocColumn",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleAttrDocColumnHidden",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleAttrTypeColumn",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleAttrTypeColumnHidden",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.expandAll",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.collapseAll",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleInsertRequiredActive",
+          "when": "false"
+        },
+        {
+          "command": "xmlVisualEditor.toggleAutoCloseActive",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": [
+      {
+        "title": "General",
+        "order": 1,
+        "properties": {
+          "xmlVisualEditor.enginePath": {
+            "type": "string",
+            "default": "",
+            "scope": "machine",
+            "description": "Path to xve-engine binary. Leave empty to use bundled binary."
+          },
+          "xmlVisualEditor.panels.autoReveal": {
+            "type": "boolean",
+            "default": true,
+            "scope": "window",
+            "description": "Automatically show the XML Visual Editor sidebar when an XML file is opened."
+          },
+          "xmlVisualEditor.panels.showElements": {
+            "type": "boolean",
+            "default": true,
+            "scope": "window",
+            "description": "Show the Elements panel when the XML Visual Editor activates."
+          },
+          "xmlVisualEditor.panels.showAttributes": {
+            "type": "boolean",
+            "default": true,
+            "scope": "window",
+            "description": "Show the Attributes panel when the XML Visual Editor activates."
+          },
+          "xmlVisualEditor.panels.showInfo": {
+            "type": "boolean",
+            "default": true,
+            "scope": "window",
+            "description": "Show the Info panel when the XML Visual Editor activates."
+          },
+          "xmlVisualEditor.completion.fontSize": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 30,
+            "scope": "window",
+            "description": "Font size in pixels for the completion dropdown. 0 = inherit from editor."
+          },
+          "xmlVisualEditor.completion.fontFamily": {
+            "type": "string",
+            "default": "",
+            "scope": "window",
+            "description": "Font family for the completion dropdown. Empty = inherit from editor."
+          },
+          "xmlVisualEditor.autoCloseTag": {
+            "type": "boolean",
+            "default": true,
+            "scope": "resource",
+            "description": "Automatically insert closing tag when typing an opening tag."
+          },
+          "xmlVisualEditor.indentation": {
+            "type": "string",
+            "enum": ["editor", "2", "4", "tab"],
+            "enumDescriptions": [
+              "Use VS Code editor indentation settings (tabSize / insertSpaces)",
+              "2 spaces",
+              "4 spaces",
+              "Tab character"
+            ],
+            "default": "editor",
+            "scope": "resource",
+            "description": "Indentation style for Pretty-Print formatting."
+          }
+        }
+      },
+      {
+        "title": "Helper Panels",
+        "order": 2,
+        "properties": {
+          "xmlVisualEditor.panels.fontSize": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 30,
+            "scope": "window",
+            "description": "Font size in pixels for helper panels (Elements, Attributes, Info). 0 = inherit from editor."
+          },
+          "xmlVisualEditor.panels.fontFamily": {
+            "type": "string",
+            "default": "",
+            "scope": "window",
+            "description": "Font family for helper panels. Empty = inherit from editor."
+          }
+        }
+      },
+      {
+        "title": "Validation",
+        "order": 3,
+        "properties": {
+          "xmlVisualEditor.validateOnSave": {
+            "type": "boolean",
+            "default": true,
+            "scope": "resource",
+            "description": "Validate XML documents when saving."
+          },
+          "xmlVisualEditor.validateOnOpen": {
+            "type": "boolean",
+            "default": true,
+            "scope": "resource",
+            "description": "Validate XML documents when opening."
+          },
+          "xmlVisualEditor.validateOnType": {
+            "type": "boolean",
+            "default": false,
+            "scope": "resource",
+            "description": "Validate XML automatically as you type (debounced)."
+          },
+          "xmlVisualEditor.validationDelay": {
+            "type": "number",
+            "default": 500,
+            "minimum": 100,
+            "maximum": 5000,
+            "scope": "resource",
+            "description": "Delay in milliseconds before validation runs after typing stops."
+          },
+          "xmlVisualEditor.validation.showInlineDecorations": {
+            "type": "boolean",
+            "default": true,
+            "scope": "resource",
+            "description": "Show inline error/warning decorations in the editor."
+          },
+          "xmlVisualEditor.validation.showGutterWarnings": {
+            "type": "boolean",
+            "default": true,
+            "scope": "resource",
+            "description": "Show warning/error icons in the editor gutter."
+          },
+          "xmlVisualEditor.validation.showFixSuggestions": {
+            "type": "boolean",
+            "default": false,
+            "scope": "resource",
+            "description": "Show lightbulb fix suggestions for fixable validation issues (experimental)."
+          },
+          "xmlVisualEditor.validation.maxProblems": {
+            "type": "number",
+            "default": 100,
+            "minimum": 1,
+            "maximum": 1000,
+            "scope": "resource",
+            "description": "Maximum number of validation problems reported per document."
+          }
+        }
+      }
+    ],
+    "configurationDefaults": {
+      "[xml]": {
+        "editor.wordWrap": "on",
+        "editor.autoClosingBrackets": "always",
+        "editor.autoClosingQuotes": "always",
+        "editor.suggest.showWords": false,
+        "editor.quickSuggestions": {
+          "other": true,
+          "comments": false,
+          "strings": false
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.0",
+    "glob": "^10.0.0",
+    "mocha": "^10.2.0",
+    "prettier": "^3.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
+  }
+}

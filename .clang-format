@@ -1,0 +1,31 @@
+# clang-format configuration (Google style with modifications)
+BasedOnStyle: Google
+ColumnLimit: 120
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AccessModifierOffset: -4
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: false
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<catch2/'
+    Priority: 3
+  - Regex: '^<(pugixml|nlohmann)'
+    Priority: 2
+  - Regex: '^"xmlvisualeditor/'
+    Priority: 1
+  - Regex: '^<'
+    Priority: 4
+  - Regex: '.*'
+    Priority: 5
+SortIncludes: CaseSensitive
+SpaceAfterCStyleCast: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeParens: ControlStatements
+Standard: c++20

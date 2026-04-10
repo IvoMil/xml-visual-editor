@@ -1,0 +1,254 @@
+// Regression tests for Bug A (xs:include): maxOccurs="unbounded" elements in types defined
+// in included schemas should not get clobbered to maxOccurs=1 by global element_cache_ entries.
+
+#include "xmlvisualeditor/schema/schema_parser.h"
+#include "xmlvisualeditor/schema/schema_validator.h"
+#include "xmlvisualeditor/services/schema_service.h"
+#include "xmlvisualeditor/services/service_container.h"
+
+#include <catch2/catch_test_macros.hpp>
+
+#include <filesystem>
+#include <fstream>
+#include <string>
+
+using namespace xve;
+
+namespace {
+
+// Helper: write a string to a file, creating directories as needed.
+void WriteFile(const std::filesystem::path& path, std::string_view content) {
+    std::ofstream ofs(path, std::ios::binary);
+    REQUIRE(ofs.is_open());
+    ofs.write(content.data(), static_cast<std::streamsize>(content.size()));
+}
+
+// Helper: RAII cleanup for temporary test files.
+struct TempDir {
+    std::filesystem::path path;
+    explicit TempDir(const std::string& name)
+        : path(std::filesystem::temp_directory_path() / name) {
+        std::filesystem::create_directories(path);
+    }
+    ~TempDir() { std::filesystem::remove_all(path); }
+};
+
+}  // namespace
+
+// ============================================================================
+// Test: xs:include with maxOccurs="unbounded" in included type
+// ============================================================================
+
+TEST_CASE("BugA-include - unbounded element in included type not clobbered",
+          "[schema][validator][bugA][include]") {
+    TempDir tmp("xve_test_include_bugA");
+
+    // Included schema: defines a global element "item" (maxOccurs defaults to 1)
+    // AND a complexType "ContainerType" with <element name="item" maxOccurs="unbounded"/>.
+    constexpr const char* kIncludedXsd = R"(
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://test.example.com"
+        targetNamespace="http://test.example.com"
+        elementFormDefault="qualified">
+  <complexType name="ItemType">
+    <sequence>
+      <element name="value" type="string" minOccurs="0"/>
+    </sequence>
+    <attribute name="id" type="string" use="required"/>
+  </complexType>
+  <element name="item" type="tns:ItemType"/>
+  <complexType name="ContainerType">
+    <sequence>
+      <element name="item" maxOccurs="unbounded" type="tns:ItemType"/>
+    </sequence>
+  </complexType>
+</schema>
+)";
+
+    // Main schema: includes the above and defines a root element using ContainerType.
+    constexpr const char* kMainXsd = R"(
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://test.example.com"
+        targetNamespace="http://test.example.com"
+        elementFormDefault="qualified">
+  <include schemaLocation="included.xsd"/>
+  <element name="root" type="tns:ContainerType"/>
+</schema>
+)";
+
+    WriteFile(tmp.path / "included.xsd", kIncludedXsd);
+    WriteFile(tmp.path / "main.xsd", kMainXsd);
+
+    ServiceContainer container;
+    container.Initialize();
+    auto* schema_service = container.GetSchemaService();
+    REQUIRE(schema_service != nullptr);
+    REQUIRE(schema_service->LoadSchemaFromFile("test", (tmp.path / "main.xsd").string()));
+
+    SECTION("content model has maxOccurs=unbounded for item element") {
+        auto cm = schema_service->GetContentModelByType("test", "ContainerType");
+        REQUIRE(cm.has_value());
+        REQUIRE(!cm->elements.empty());
+        bool found = false;
+        for (const auto& elem : cm->elements) {
+            if (elem.name == "item") {
+                found = true;
+                CHECK(elem.max_occurs == kUnbounded);
+            }
+        }
+        CHECK(found);
+    }
+
+    SECTION("9 item children should NOT produce errors") {
+        std::string xml = R"(<?xml version="1.0"?>
+<root xmlns="http://test.example.com">)";
+        for (int i = 0; i < 9; ++i)
+            xml += R"(<item id=")" + std::to_string(i) + R"("><value>v</value></item>)";
+        xml += "</root>";
+        auto diags = SchemaValidator::Validate(xml, *schema_service, "test");
+        for (const auto& d : diags)
+            INFO("diagnostic: " << d.message);
+        CHECK(diags.empty());
+    }
+
+    container.Shutdown();
+}
+
+// ============================================================================
+// Test: xs:include with element ref + maxOccurs="unbounded"
+// ============================================================================
+
+TEST_CASE("BugA-include - element ref with unbounded maxOccurs in included type",
+          "[schema][validator][bugA][include]") {
+    TempDir tmp("xve_test_include_ref");
+
+    // Included schema: defines a global "item" and a type using ref with maxOccurs="unbounded".
+    constexpr const char* kIncludedXsd = R"(
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://test.example.com"
+        targetNamespace="http://test.example.com"
+        elementFormDefault="qualified">
+  <complexType name="ItemType">
+    <sequence>
+      <element name="value" type="string" minOccurs="0"/>
+    </sequence>
+  </complexType>
+  <element name="item" type="tns:ItemType"/>
+  <complexType name="ContainerType">
+    <sequence>
+      <element ref="tns:item" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+</schema>
+)";
+
+    constexpr const char* kMainXsd = R"(
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://test.example.com"
+        targetNamespace="http://test.example.com"
+        elementFormDefault="qualified">
+  <include schemaLocation="included.xsd"/>
+  <element name="root" type="tns:ContainerType"/>
+</schema>
+)";
+
+    WriteFile(tmp.path / "included.xsd", kIncludedXsd);
+    WriteFile(tmp.path / "main.xsd", kMainXsd);
+
+    ServiceContainer container;
+    container.Initialize();
+    auto* schema_service = container.GetSchemaService();
+    REQUIRE(schema_service != nullptr);
+    REQUIRE(schema_service->LoadSchemaFromFile("test", (tmp.path / "main.xsd").string()));
+
+    SECTION("content model has maxOccurs=unbounded for item ref") {
+        auto cm = schema_service->GetContentModelByType("test", "ContainerType");
+        REQUIRE(cm.has_value());
+        REQUIRE(!cm->elements.empty());
+        for (const auto& elem : cm->elements) {
+            if (elem.name == "item") {
+                CHECK(elem.max_occurs == kUnbounded);
+            }
+        }
+    }
+
+    SECTION("9 item children should NOT produce errors") {
+        std::string xml = R"(<?xml version="1.0"?>
+<root xmlns="http://test.example.com">)";
+        for (int i = 0; i < 9; ++i)
+            xml += "<item><value>v</value></item>";
+        xml += "</root>";
+        auto diags = SchemaValidator::Validate(xml, *schema_service, "test");
+        for (const auto& d : diags)
+            INFO("diagnostic: " << d.message);
+        CHECK(diags.empty());
+    }
+
+    container.Shutdown();
+}
+
+// ============================================================================
+// Test: xs:include with different XSD prefix in included file
+// ============================================================================
+
+TEST_CASE("BugA-include - different XSD prefix in included file",
+          "[schema][validator][bugA][include]") {
+    TempDir tmp("xve_test_include_prefix");
+
+    // Included schema uses default namespace for XSD (no prefix).
+    constexpr const char* kIncludedXsd = R"(
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://test.example.com"
+        targetNamespace="http://test.example.com"
+        elementFormDefault="qualified">
+  <complexType name="ContainerType">
+    <sequence>
+      <element name="item" maxOccurs="unbounded" type="string"/>
+    </sequence>
+  </complexType>
+</schema>
+)";
+
+    // Main schema uses xs: prefix.
+    constexpr const char* kMainXsd = R"(
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://test.example.com"
+           targetNamespace="http://test.example.com"
+           elementFormDefault="qualified">
+  <xs:include schemaLocation="included.xsd"/>
+  <xs:element name="root" type="tns:ContainerType"/>
+</xs:schema>
+)";
+
+    WriteFile(tmp.path / "included.xsd", kIncludedXsd);
+    WriteFile(tmp.path / "main.xsd", kMainXsd);
+
+    ServiceContainer container;
+    container.Initialize();
+    auto* schema_service = container.GetSchemaService();
+    REQUIRE(schema_service != nullptr);
+    REQUIRE(schema_service->LoadSchemaFromFile("test", (tmp.path / "main.xsd").string()));
+
+    SECTION("content model for included type with different prefix") {
+        auto cm = schema_service->GetContentModelByType("test", "ContainerType");
+        REQUIRE(cm.has_value());
+        REQUIRE(cm->model_type == "sequence");
+        REQUIRE(!cm->elements.empty());
+        CHECK(cm->elements[0].name == "item");
+        CHECK(cm->elements[0].max_occurs == kUnbounded);
+    }
+
+    SECTION("9 items should validate clean") {
+        std::string xml = R"(<?xml version="1.0"?>
+<root xmlns="http://test.example.com">)";
+        for (int i = 0; i < 9; ++i)
+            xml += "<item>v" + std::to_string(i) + "</item>";
+        xml += "</root>";
+        auto diags = SchemaValidator::Validate(xml, *schema_service, "test");
+        for (const auto& d : diags)
+            INFO("diagnostic: " << d.message);
+        CHECK(diags.empty());
+    }
+
+    container.Shutdown();
+}

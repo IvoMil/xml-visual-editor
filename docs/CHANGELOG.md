@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Improved
+- **`scripts/sync-to-public.ps1`**: Sync commits now include a summary of private repo commit messages instead of generic "mirror from private repo" text
+  - Embeds `Private-Commit: <sha>` trailer in each sync commit to track last synced state
+  - On subsequent syncs, automatically collects commit messages since the last sync
+  - Falls back to the last 20 commits when no previous sync marker exists (legacy/first sync)
+  - Dry-run mode shows a preview of the commit message that would be generated
+  - Custom `-CommitMessage` also gets the `Private-Commit:` trailer appended
+
 ## [0.5.0] - 2026-04-10
 
 ### Added — Phase 5a: Open-Source Dual-Repo Setup

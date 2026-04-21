@@ -1,8 +1,8 @@
 # XML Visual Editor
 
-Multi-platform toolkit for advanced XSD schema-aware XML editing.
+Multi-platform toolkit for advanced XSD schema-aware XML editing, with an XMLSpy-style hierarchical Grid View for any XML document.
 
-> **Preview Release (v0.5.0)** — This extension is in active development. Features are functional but the API may change. Feedback and bug reports are welcome!
+> **Preview Release (v0.6.0)** — This extension is in active development. Features are functional but the API may change. Feedback and bug reports are welcome!
 
 ![XML Visual Editor overview](https://raw.githubusercontent.com/IvoMil/xml-visual-editor/main/vscode-extension/resources/screenshots/schema-aware-editing.gif)
 
@@ -10,6 +10,7 @@ Multi-platform toolkit for advanced XSD schema-aware XML editing.
 
 ### Core Features
 
+- **Grid View (Read-Only, new in 0.6.0)** — XMLSpy-style hierarchical grid view of the document (see section below)
 - **Pretty-Print** — Reformat XML with configurable indentation (2/4 spaces, tab, or editor setting)
 - **Linearize** — Compact XML to a single line, removing unnecessary whitespace
 - **Strip Whitespace** — Remove all non-significant whitespace from the document
@@ -29,6 +30,14 @@ Multi-platform toolkit for advanced XSD schema-aware XML editing.
 - **Interactive Info Panel** — Collapsible sections with type info, documentation, compositor context, instance state, and enumeration values
 - **Schema-Aware Completions** — Context- and Scehma aware element, attribute name, attribute value, and text content completions with rich documentation popups and "Insert Required" mode
 - **Schema Management** — Auto-detection from `xsi:schemaLocation` / `xsi:noNamespaceSchemaLocation`, HTTP/HTTPS downloading with recursive import/include resolution, persistent local caching, and manual loading via file picker
+
+## Grid View (Read-Only)
+
+New in v0.6.0. The **Grid View** renders any XML document as an interactive hierarchical grid — inspired by XMLSpy's Grid/Table view — in the same tab as the text editor. Launch it via the `XML: Toggle Grid View` command, the XML Actions toolbar button, or the right-click context menu. Repeated-sibling groups are auto-detected as tables (including hybrid tables that mix scalar and sub-element columns), chevron cells drill down in place within their own column, sections can be flipped rows↔columns or toggled between tree and table mode, and rows/columns support multi-select with `+`/`-` batch expand/collapse. Grid state is preserved across tab switches.
+
+**Read-only in this release.** Inline editing and bidirectional text↔grid sync are planned for the next release — for now, switch back to the text view to edit.
+
+![Grid View](https://raw.githubusercontent.com/IvoMil/xml-visual-editor/main/vscode-extension/resources/screenshots/grid-view.gif)
 
 ## Schema-Aware Editing
 
@@ -104,6 +113,7 @@ Format XML documents with Pretty-Print (configurable indentation), Linearize (co
 ## Known Limitations
 
 - **Preview/Beta release** — Features are stable but the extension is under active development. Feedback welcome!
+- **Grid View is read-only** in this release; editing and bidirectional sync are planned for the next phase.
 - **Platform support**: Windows x64 fully supported. Linux and macOS binaries coming soon.
 - **Schema support**: XSD (XML Schema 1.0) only. RelaxNG and DTD are not supported.
 - **No XML tree view / outline** — Planned for a future release.

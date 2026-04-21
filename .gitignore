@@ -57,3 +57,11 @@ build_stderr.txt
 build_stdout.txt
 test_stderr.txt
 test_stdout.txt
+build-log.txt
+build_xve.log
+test-log.txt
+test-output.txt
+test-output.log
+vscode-extension/test-output.log
+vscode-extension/test_out.txt
+commit_msg.txt

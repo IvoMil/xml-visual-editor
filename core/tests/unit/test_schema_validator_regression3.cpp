@@ -154,7 +154,7 @@ constexpr const char* kEnumerationUnboundedChoiceXsd = R"(
 // Test 1: Simple choice unbounded in sequence — baseline
 // ============================================================================
 
-TEST_CASE("BugA - simple choice unbounded in sequence", "[schema][validator][bugA]") {
+TEST_CASE("SchemaValidator - unbounded choice in sequence accepts repeated children without false positive", "[schema][validator][bugA]") {
     ServiceContainer container;
     container.Initialize();
     auto* schema_service = container.GetSchemaService();
@@ -193,7 +193,7 @@ TEST_CASE("BugA - simple choice unbounded in sequence", "[schema][validator][bug
 // Test 2: FEWS-like group refs before unbounded choice
 // ============================================================================
 
-TEST_CASE("BugA - FEWS group refs before unbounded choice", "[schema][validator][bugA]") {
+TEST_CASE("SchemaValidator - group refs preceding unbounded choice do not cap element count", "[schema][validator][bugA]") {
     ServiceContainer container;
     container.Initialize();
     auto* schema_service = container.GetSchemaService();
@@ -247,7 +247,7 @@ TEST_CASE("BugA - FEWS group refs before unbounded choice", "[schema][validator]
 // Test 3: Bug trigger — group ref (sequence with inner choice) as choice branch
 // ============================================================================
 
-TEST_CASE("BugA - group ref seq-with-choice as choice branch", "[schema][validator][bugA]") {
+TEST_CASE("SchemaValidator - group ref containing sequence-with-choice as a choice branch resolves content model correctly", "[schema][validator][bugA]") {
     ServiceContainer container;
     container.Initialize();
     auto* schema_service = container.GetSchemaService();
@@ -292,7 +292,7 @@ TEST_CASE("BugA - group ref seq-with-choice as choice branch", "[schema][validat
 // Test 4: Full FEWS pattern — group refs + group ref as choice branch
 // ============================================================================
 
-TEST_CASE("BugA - full FEWS pattern group ref before and inside choice", "[schema][validator][bugA]") {
+TEST_CASE("SchemaValidator - full FEWS pattern with group ref before and inside unbounded choice accepts all valid children", "[schema][validator][bugA]") {
     ServiceContainer container;
     container.Initialize();
     auto* schema_service = container.GetSchemaService();
@@ -354,7 +354,7 @@ TEST_CASE("BugA - full FEWS pattern group ref before and inside choice", "[schem
 // Test 5: Enumeration pattern — unbounded choice after group ref
 // ============================================================================
 
-TEST_CASE("BugA - enumeration unbounded choice after group ref", "[schema][validator][bugA]") {
+TEST_CASE("SchemaValidator - enumeration elements after group ref under unbounded choice are all accepted without false positive", "[schema][validator][bugA]") {
     ServiceContainer container;
     container.Initialize();
     auto* schema_service = container.GetSchemaService();
@@ -387,7 +387,7 @@ TEST_CASE("BugA - enumeration unbounded choice after group ref", "[schema][valid
 // Negative tests — legitimate violations still caught
 // ============================================================================
 
-TEST_CASE("BugA - legitimate maxOccurs violation still caught", "[schema][validator][bugA]") {
+TEST_CASE("SchemaValidator - genuine maxOccurs violations are still detected when element count truly exceeds the limit", "[schema][validator][bugA]") {
     ServiceContainer container;
     container.Initialize();
     auto* schema_service = container.GetSchemaService();

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(
     xml-visual-editor
-    VERSION 0.1.0
+    VERSION 0.5.0
     DESCRIPTION "Multi-platform XML editing toolkit with XSD schema awareness"
     LANGUAGES CXX
 )

@@ -1,0 +1,272 @@
+/* === Body === */
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--grid-bg);
+  color: var(--grid-fg);
+  font-family: var(--grid-font-family);
+  font-size: var(--grid-font-size);
+}
+
+/* === Grid Root — single CSS Grid container === */
+/* grid-template-columns is set inline by the renderer based on document depth */
+.grid-root {
+  display: grid;
+  row-gap: 0;
+  column-gap: 0;
+  align-content: start;
+  --indent: 20px;
+  padding: 4px 8px;
+  user-select: none;
+  border: 1px solid var(--grid-border);
+  /* Allow root to grow beyond viewport so wide table regions trigger horizontal
+     scrolling on the body, instead of collapsing their columns. */
+  min-width: min-content;
+}
+
+/* === Empty state === */
+.grid-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  opacity: 0.6;
+}
+
+/* === Row wrapper — display:contents so children become grid items === */
+.g-row {
+  display: contents;
+}
+
+/* === Cell placement in global grid (grid-column set inline by renderer) === */
+.g-row > .c-name {
+  padding-left: calc(var(--depth, 0) * var(--indent) + 4px);
+  padding-right: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  cursor: default;
+  border-bottom: 1px solid var(--grid-border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.g-row > .c-value {
+  padding: 2px 8px;
+  white-space: nowrap;
+  cursor: default;
+  border-bottom: 1px solid var(--grid-border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* === Hover and selection (child selectors — display:contents has no box) === */
+.g-row:hover > * {
+  background-color: var(--grid-hover-bg);
+}
+.g-row.selected > * {
+  background-color: var(--grid-selection-bg);
+  color: var(--grid-selection-fg);
+}
+
+/* === Depth class fallbacks (d-0..d-30) ===
+   CSP-safe alternative to inline `style="--depth: N"`. If the webview CSP blocks
+   element-level inline style attributes (when 'unsafe-inline' is absent from style-src),
+   these class-based rules still apply the correct depth via the --depth custom property. */
+.g-row.d-0 { --depth: 0; }
+.g-row.d-1 { --depth: 1; }
+.g-row.d-2 { --depth: 2; }
+.g-row.d-3 { --depth: 3; }
+.g-row.d-4 { --depth: 4; }
+.g-row.d-5 { --depth: 5; }
+.g-row.d-6 { --depth: 6; }
+.g-row.d-7 { --depth: 7; }
+.g-row.d-8 { --depth: 8; }
+.g-row.d-9 { --depth: 9; }
+.g-row.d-10 { --depth: 10; }
+.g-row.d-11 { --depth: 11; }
+.g-row.d-12 { --depth: 12; }
+.g-row.d-13 { --depth: 13; }
+.g-row.d-14 { --depth: 14; }
+.g-row.d-15 { --depth: 15; }
+.g-row.d-16 { --depth: 16; }
+.g-row.d-17 { --depth: 17; }
+.g-row.d-18 { --depth: 18; }
+.g-row.d-19 { --depth: 19; }
+.g-row.d-20 { --depth: 20; }
+.g-row.d-21 { --depth: 21; }
+.g-row.d-22 { --depth: 22; }
+.g-row.d-23 { --depth: 23; }
+.g-row.d-24 { --depth: 24; }
+.g-row.d-25 { --depth: 25; }
+.g-row.d-26 { --depth: 26; }
+.g-row.d-27 { --depth: 27; }
+.g-row.d-28 { --depth: 28; }
+.g-row.d-29 { --depth: 29; }
+.g-row.d-30 { --depth: 30; }
+
+/* === Row type variants === */
+.g-row.r-attr > .c-value {
+  opacity: 0.7;
+}
+.g-row.r-elem > .c-value,
+.g-row.r-tree > .c-value {
+  opacity: 0.8;
+}
+.g-row.r-tregion-label > .c-name {
+  font-weight: 600;
+}
+
+/* === Indent guide lines (vertical depth indicators) === */
+.g-row > .c-name {
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(var(--indent) - 1px),
+      var(--vscode-tree-indentGuidesStroke, rgba(128, 128, 128, 0.3)) calc(var(--indent) - 1px),
+      var(--vscode-tree-indentGuidesStroke, rgba(128, 128, 128, 0.3)) var(--indent)
+    );
+  background-size: calc(var(--depth, 0) * var(--indent)) 100%;
+  background-repeat: no-repeat;
+  background-position: left top;
+}
+
+/* === Expand/collapse toggle === */
+.expand-toggle {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.expand-spacer {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* === Node icons === */
+.node-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.element-icon {
+  color: var(--grid-element-icon-color);
+}
+.attribute-icon {
+  color: var(--grid-attribute-icon-color);
+}
+
+/* === Text styles === */
+.node-name {
+  margin-right: 8px;
+  font-weight: 500;
+}
+.attr-name {
+  font-style: italic;
+}
+.node-value {
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sibling-index {
+  opacity: 0.5;
+  font-size: 0.85em;
+}
+.child-count {
+  opacity: 0.5;
+  font-size: 0.85em;
+}
+
+/* === Table cells in global grid ===
+   Table rows are .g-row.r-trow elements with display:contents.
+   Table cells use explicit grid-column placement set inline by the renderer.
+   Filler cells draw indent guides. */
+.t-cell {
+  padding: 2px 8px;
+  border-right: 1px solid var(--grid-border);
+  border-bottom: 1px solid var(--grid-border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.t-filler {
+  border-right: none;
+  padding: 0;
+  /* Draw indent guides in the filler cell so the table region visually reflects its depth. */
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(var(--indent) - 1px),
+    var(--vscode-tree-indentGuidesStroke, rgba(128, 128, 128, 0.3)) calc(var(--indent) - 1px),
+    var(--vscode-tree-indentGuidesStroke, rgba(128, 128, 128, 0.3)) var(--indent)
+  );
+  background-size: calc(var(--depth, 0) * var(--indent)) 100%;
+  background-repeat: no-repeat;
+  background-position: left top;
+}
+.t-header > .t-th {
+  font-weight: 600;
+  background: var(--grid-header-bg);
+}
+.t-rowid {
+  background: var(--grid-header-bg);
+  font-weight: 600;
+  text-align: right;
+  padding-right: 6px;
+}
+.attr-col-header {
+  color: var(--grid-attribute-icon-color);
+}
+.elem-col-header {
+  color: var(--grid-element-icon-color);
+}
+
+/* === Expandable attribute-only cell in table regions === */
+.cell-toggle {
+  font-size: 10px;
+  cursor: pointer;
+  margin-right: 2px;
+}
+.cell-elem-name {
+  font-weight: 500;
+  margin-right: 4px;
+  color: var(--grid-element-icon-color);
+}
+.cell-attr-summary {
+  opacity: 0.6;
+}
+.cell-nv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 4px;
+  margin-top: 2px;
+}
+.cell-nv-name {
+  opacity: 0.8;
+}
+.cell-nv-value {
+  opacity: 0.7;
+}
+
+/* === Complex content placeholder === */
+.complex-content {
+  opacity: 0.5;
+  font-style: italic;
+}

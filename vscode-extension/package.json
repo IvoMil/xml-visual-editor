@@ -1,8 +1,8 @@
 {
   "name": "xml-visual-editor",
   "displayName": "XML Visual Editor",
-  "description": "Advanced XML editing with XSD schema-aware validation, completions, and interactive helper panels",
-  "version": "0.5.0",
+  "description": "Advanced XML editing with an XMLSpy-style hierarchical Grid View, XSD schema-aware validation, completions, and interactive helper panels",
+  "version": "0.6.0",
   "publisher": "IvoSoft",
   "icon": "resources/icons/icon.png",
   "preview": true,
@@ -13,9 +13,10 @@
   "categories": [
     "Programming Languages",
     "Formatters",
-    "Linters"
+    "Linters",
+    "Visualization"
   ],
-  "keywords": ["xml", "xsd", "schema", "validation", "editor", "formatting", "xpath", "intellisense"],
+  "keywords": ["xml", "xsd", "schema", "validation", "editor", "formatting", "xpath", "intellisense", "grid", "grid-view", "tree-view", "xmlspy", "table"],
   "galleryBanner": {
     "color": "#1e1e1e",
     "theme": "dark"
@@ -73,6 +74,18 @@
         }
       ]
     },
+    "customEditors": [
+      {
+        "viewType": "xmlVisualEditor.gridView",
+        "displayName": "XML Grid View",
+        "selector": [
+          {
+            "filenamePattern": "*.xml"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
     "submenus": [
       {
         "id": "xmlVisualEditor.contextMenu",
@@ -224,6 +237,11 @@
         "title": "Expand Self-Closing Tag",
         "category": "XML Visual Editor",
         "icon": "$(unfold)"
+      },
+      {
+        "command": "xmlVisualEditor.toggleGridView",
+        "title": "XML Visual Editor: Toggle Grid View",
+        "icon": "$(table)"
       }
     ],
     "menus": {
@@ -274,6 +292,10 @@
         {
           "command": "xmlVisualEditor.expandSelfClosingTag",
           "group": "4_navigate@3"
+        },
+        {
+          "command": "xmlVisualEditor.toggleGridView",
+          "group": "5_gridview@1"
         }
       ],
       "view/title": [

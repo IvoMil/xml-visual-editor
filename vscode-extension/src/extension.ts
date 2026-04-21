@@ -15,6 +15,12 @@ import { resolveThemeColors, invalidateThemeColorCache } from './shared/panel-ut
 import { TagAutoCloseService } from './services/tag-autoclose';
 import { registerElementInsertionCommands } from './commands/element-insertion-commands';
 import { registerXmlCommands } from './commands/xml-commands';
+import { GridViewPanel } from './grid-view/grid-view-panel';
+import {
+  handleDocumentOpen,
+  updateStatusBar,
+  type DocumentHandlerDeps,
+} from './extension/document-handlers';
 
 let engineClient: EngineClient | undefined;
 let gutterService: GutterDecorationService | undefined;
@@ -55,6 +61,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   infoPanelProvider = new InfoPanelProvider(engineClient);
   xmlActionsProvider = new XmlActionsProvider();
   autoCloseService = new TagAutoCloseService();
+  const docHandlerDeps: DocumentHandlerDeps = {
+    schemaService,
+    xmlActionsProvider,
+    engineClient,
+    cursorTrackingService,
+    validationService,
+  };
   // Register CodeAction provider
   context.subscriptions.push(
     vscode.languages.registerCodeActionsProvider(
@@ -80,6 +93,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       { webviewOptions: { retainContextWhenHidden: true } },
     ),
     vscode.window.registerWebviewViewProvider('xmlvisualeditor.infoPanel', infoPanelProvider, {
+      webviewOptions: { retainContextWhenHidden: true },
+    }),
+  );
+
+  // Register Grid View custom editor
+  const gridViewProvider = new GridViewPanel(context, engineClient);
+  context.subscriptions.push(
+    vscode.window.registerCustomEditorProvider(GridViewPanel.viewType, gridViewProvider, {
+      supportsMultipleEditorsPerDocument: true,
       webviewOptions: { retainContextWhenHidden: true },
     }),
   );
@@ -209,7 +231,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   }
 
   engineClient.onReady(() => {
-    updateStatusBar('ready');
+    updateStatusBar(statusBarItem, 'ready');
 
     // Initialize XML Actions panel with active file BEFORE docs load
     // (handleDocumentOpen will set schema/validation state afterward)
@@ -220,7 +242,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // Open all XML documents and wait for schemas to load before revealing panels
     const opens = vscode.workspace.textDocuments
       .filter((doc) => doc.languageId === 'xml')
-      .map((doc) => handleDocumentOpen(doc).catch(() => {}));
+      .map((doc) => handleDocumentOpen(doc, docHandlerDeps).catch(() => {}));
 
     void Promise.allSettled(opens).then(async () => {
       const isXml = vscode.window.activeTextEditor?.document.languageId === 'xml';
@@ -251,12 +273,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   });
 
   engineClient.onError((err) => {
-    updateStatusBar('error');
+    updateStatusBar(statusBarItem, 'error');
     console.error(`Engine error: ${err.message}`);
   });
   engineClient.onExit((code) => {
     if (code !== 0 && code !== null) {
-      updateStatusBar('error');
+      updateStatusBar(statusBarItem, 'error');
     }
   });
 
@@ -306,6 +328,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         suppressAutoReveal = false;
       }, 1000);
     }),
+    vscode.commands.registerCommand('xmlVisualEditor.toggleGridView', async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor || editor.document.languageId !== 'xml') {
+        return;
+      }
+      const uri = editor.document.uri;
+      const column = editor.viewColumn;
+      await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+      await vscode.commands.executeCommand('vscode.openWith', uri, GridViewPanel.viewType, column);
+    }),
   );
 
   // Document event handlers
@@ -314,7 +346,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       if (doc.languageId !== 'xml') return;
       const cfg = vscode.workspace.getConfiguration('xmlVisualEditor', doc.uri);
       if (cfg.get<boolean>('validateOnOpen', true)) {
-        void handleDocumentOpen(doc);
+        void handleDocumentOpen(doc, docHandlerDeps);
       }
     }),
 
@@ -363,7 +395,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             .executeCommand('xmlvisualeditor.elementsPanel.focus')
             .then(() => vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup'));
         }
-        void handleDocumentOpen(editor.document).then(() => {
+        void handleDocumentOpen(editor.document, docHandlerDeps).then(() => {
           cursorTrackingService?.forceRefresh();
         });
       }
@@ -440,79 +472,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   void engineClient.start().catch((err: unknown) => {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`Failed to start engine: ${message}`);
-    updateStatusBar('error');
+    updateStatusBar(statusBarItem, 'error');
     void vscode.window.showErrorMessage(`XML Visual Editor: Failed to start engine — ${message}`);
   });
 }
 
 export function deactivate(): void {
   void engineClient?.stop();
-}
-
-async function handleDocumentOpen(document: vscode.TextDocument): Promise<void> {
-  if (document.languageId !== 'xml') {
-    return;
-  }
-
-  // Try to auto-load schema
-  const schemaLoadResult = (await schemaService?.loadSchemaForDocument(document)) ?? 'no-reference';
-
-  // Update actions panel with schema info
-  const schemaId = schemaService?.getSchemaIdForDocument(document.uri.toString());
-  if (schemaId) {
-    xmlActionsProvider?.setSchema(schemaId);
-  } else {
-    xmlActionsProvider?.setSchema('');
-  }
-
-  // Sync document content to engine so panels can read current attribute values
-  if (engineClient?.isReady()) {
-    await engineClient
-      .sendRequest('document.update', {
-        doc_id: document.uri.toString(),
-        content: document.getText(),
-      })
-      .catch(() => {
-        /* Engine may not support document.update yet */
-      });
-  }
-
-  // Refresh panels in case schema was just loaded
-  cursorTrackingService?.forceRefresh();
-
-  // Validate
-  await validationService?.validateFull(document);
-
-  // Update actions panel with validation status
-  const diagnosticCount = vscode.languages.getDiagnostics(document.uri).length;
-  if (schemaLoadResult === 'load-failed' && diagnosticCount === 0) {
-    // Schema reference found but couldn't be loaded — don't show misleading "Valid"
-    xmlActionsProvider?.setValidationStatus(-2);
-  } else {
-    xmlActionsProvider?.setValidationStatus(diagnosticCount);
-  }
-}
-
-function updateStatusBar(state: 'ready' | 'starting' | 'error'): void {
-  if (!statusBarItem) {
-    return;
-  }
-
-  switch (state) {
-    case 'ready':
-      statusBarItem.text = '$(check) XVE: Ready';
-      statusBarItem.tooltip = 'XML Visual Editor engine is running';
-      statusBarItem.backgroundColor = undefined;
-      break;
-    case 'starting':
-      statusBarItem.text = '$(loading~spin) XVE: Starting...';
-      statusBarItem.tooltip = 'XML Visual Editor engine is starting';
-      statusBarItem.backgroundColor = undefined;
-      break;
-    case 'error':
-      statusBarItem.text = '$(error) XVE: Error';
-      statusBarItem.tooltip = 'XML Visual Editor engine encountered an error';
-      statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
-      break;
-  }
 }

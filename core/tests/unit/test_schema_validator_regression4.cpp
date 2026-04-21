@@ -67,7 +67,7 @@ constexpr const char* kInlineUnboundedXsd = R"(
 
 }  // namespace
 
-TEST_CASE("bugA: inline unbounded sequence - no false positive", "[bugA][validator]") {
+TEST_CASE("SchemaValidator - inline unbounded sequence child does not trigger a false Too-many diagnostic", "[bugA][validator]") {
     ServiceContainer sc;
     sc.Initialize();
     auto* schema_svc = sc.GetSchemaService();
@@ -87,7 +87,7 @@ TEST_CASE("bugA: inline unbounded sequence - no false positive", "[bugA][validat
 
 // ── Include tests — reproduce the FEWS schema pattern ───────────────────
 
-TEST_CASE("bugA: xs:include with maxOccurs='unbounded' - no false positive", "[bugA][validator]") {
+TEST_CASE("SchemaValidator - xs:include'd type with unbounded element does not produce a false Too-many diagnostic", "[bugA][validator]") {
     TempDir tmp;
 
     // shared.xsd: defines a type with maxOccurs="unbounded" child + a global element with same name
@@ -126,7 +126,7 @@ TEST_CASE("bugA: xs:include with maxOccurs='unbounded' - no false positive", "[b
     CHECK(diags.empty());
 }
 
-TEST_CASE("bugA: xs:include without global element - no false positive", "[bugA][validator]") {
+TEST_CASE("SchemaValidator - xs:include without global element name collision accepts all unbounded repetitions", "[bugA][validator]") {
     TempDir tmp;
 
     // shared.xsd: type only, no global element collision
@@ -163,7 +163,7 @@ TEST_CASE("bugA: xs:include without global element - no false positive", "[bugA]
     CHECK(diags.empty());
 }
 
-TEST_CASE("bugA: FEWS-like pattern - no-prefix XSD namespace with include", "[bugA][validator]") {
+TEST_CASE("SchemaValidator - FEWS-style default XSD namespace with xs:include accepts many enumeration children", "[bugA][validator]") {
     TempDir tmp;
 
     // Simulates the FEWS schema: default namespace = XSD namespace (no xs: prefix),
@@ -226,7 +226,7 @@ TEST_CASE("bugA: FEWS-like pattern - no-prefix XSD namespace with include", "[bu
     }
 }
 
-TEST_CASE("bugA: include maxOccurs=1 is correctly enforced", "[bugA][validator]") {
+TEST_CASE("SchemaValidator - xs:include'd type with maxOccurs=1 still enforces the limit and reports a diagnostic on violation", "[bugA][validator]") {
     TempDir tmp;
 
     WriteFile(tmp.path / "shared.xsd", R"(
@@ -268,7 +268,7 @@ TEST_CASE("bugA: include maxOccurs=1 is correctly enforced", "[bugA][validator]"
     CHECK(found_too_many);
 }
 
-TEST_CASE("bugA: global element same name different maxOccurs - content model wins", "[bugA][validator]") {
+TEST_CASE("SchemaValidator - local content model maxOccurs overrides global element declaration when names collide", "[bugA][validator]") {
     TempDir tmp;
 
     // shared.xsd: global element "item" (no maxOccurs → defaults to 1)
@@ -307,7 +307,7 @@ TEST_CASE("bugA: global element same name different maxOccurs - content model wi
     CHECK(diags.empty());
 }
 
-TEST_CASE("bugA: element ref with maxOccurs='unbounded' + global element", "[bugA][validator]") {
+TEST_CASE("SchemaValidator - element ref with maxOccurs='unbounded' is not capped by the co-existing global element declaration", "[bugA][validator]") {
     TempDir tmp;
 
     // shared.xsd: global element "item" AND a type that references it via ref

@@ -6,36 +6,82 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Improved
-- **`scripts/sync-to-public.ps1`**: Sync commits now include a summary of private repo commit messages instead of generic "mirror from private repo" text
-  - Embeds `Private-Commit: <sha>` trailer in each sync commit to track last synced state
-  - On subsequent syncs, automatically collects commit messages since the last sync
-  - Falls back to the last 20 commits when no previous sync marker exists (legacy/first sync)
-  - Dry-run mode shows a preview of the commit message that would be generated
-  - Custom `-CommitMessage` also gets the `Private-Commit:` trailer appended
+## [0.6.0] - 2026-04-21
+
+### Highlights
+- **Grid View (read-only) released**: A XMLSpy-style hierarchical grid rendering of any XML document, launched from the `XML: Toggle Grid View` command or the XML Actions toolbar. The grid auto-detects repeated-sibling groups and renders them as tables (including "hybrid" tables whose columns mix scalar values with sub-elements), supports rows/columns orientation flip, per-section tree/table mode toggling, column-scoped chevron drill-down for nested structures at any depth, multi-row and multi-column selection with keyboard and mouse, batch expand/collapse, tree indent guides, visible grid lines, and full state preservation across tab switches. **This release ships read-only**; inline editing, bidirectional text↔grid sync, and schema-aware grid operations are planned for the next phase.
+
+### Added
+- **Grid View column-scoped chevron drill-down**: Chevron cells inside a hybrid table now drill down in place within their own column rather than opening a full-width block below the row. Each expanded chevron host renders a column-bounded sub-grid (`.g-drill-box`) that reuses the main renderer for its contents, so nested tables, labels, attributes, toggle icons, column-paint highlighting, and further drill-down all work uniformly at any nesting depth. Multiple hosts in the same row can be expanded simultaneously; outer-row non-host cells extend vertically to span the tallest drill-down in the row. Grid View state (expansions, drill-down openings, selection, table-mode/flip toggles) is now fully preserved when switching away from the Grid View tab and back. Chevron glyphs across the grid (tree rows, element labels, table cells, segment headers) now render at a single consistent small size.
+- **Grid View orientation flip — hybrid tables** (Phase 5b.3b, Round B.1): Repeated-sibling groups whose members share the same attribute and element-child structure now render as a hybrid table even when some columns contain sub-elements; chevron-bearing columns drill down in place. Per-section toggle icons let the user switch a section between tree mode and table mode, and flip table rows ↔ columns when in table mode. The table-mode-ON icon sits in the header-row gutter, the flip icon in the top-left corner cell, and the table-mode-OFF icon appears on selected hybrid-capable sections. Initial grid state is now fully collapsed on open.
+- **Grid View column multi-select** (Phase 5b.3b, Round B.1): Column headers are selectable alongside rows (plain click / Ctrl+Click / Shift+Click), with Shift+Left/Shift+Right range extension and Escape to clear. Row and column selection are mutually exclusive on the same node. Selection survives orientation flips — rows selected before a flip render as column-highlighted cells afterwards, and vice versa.
+- **Grid View multi-row selection and batch expand/collapse** (Phase 5b.3b, Round B.6): The Grid View supports multi-row selection with anchor + active-cursor semantics. Mouse: plain click replaces, Ctrl+Click toggles, Shift+Click extends. Keyboard: Shift+Arrow/Home/End extends, Escape collapses to the cursor, Ctrl+A selects all visible rows. `+` and `-` now operate on every selected row at once in a single re-render, with direction-guard so `+` only expands and `-` only collapses. Pressing `+` drills the selection one level deeper: newly revealed child rows (attributes, `#group` labels, table-row bodies, comments, text values) join the selection, so repeated `+` opens the whole subtree. `-` collapses innermost first, so ancestors stay open until their selected descendants have closed. `+` on a row inside a table region expands every chevron-bearing cell in that row. Selection survives document updates via id reconciliation; cursor fallback prefers the first surviving id in document order. Live-edit reconcile is debounced to 150 ms and expansion state survives tree rebuilds on tab switch or edit.
+
+- **Grid View scaffold** (Phase 5b.1): CustomTextEditorProvider-based Grid View with toggle command, C++ `GridViewService` + `gridView.getTreeData` JSON-RPC method, MVC tree renderer with element/attribute icons, VS Code theme integration
+- **Grid View table mode** (Phase 5b.2): Auto-detection of repeated child elements rendered as HTML tables, element numbering (`<1>`, `<2>`), parent count annotations (`(N)`), distinct header/row-ID styling
+- **Grid View expand/collapse & navigation** (Phase 5b.3): Click-to-toggle chevrons, +/- keyboard shortcuts, arrow key tree navigation (Up/Down/Left/Right), Tab/Shift+Tab cycling, node selection with visual highlight, shared column boundaries for sibling name-value grids
+- **Grid View global grid system** (Phase 5b.3b): Single root-level CSS Grid with shared column tracks (`repeat(N, max-content) 1fr`); `display: contents` flat row rendering so all rows — tree, attribute, table header, table data — place their cells into the SAME global grid lines; table candidacy refined to keep every element reachable via its own chevron (Issue F fix)
+- **Grid View visible global grid lines** (Phase 5b.3b, Round A): 1px vertical + horizontal grid lines on every column/row boundary, drawn via `column-gap: 1px` / `row-gap: 1px` on `.grid-root` with a border-coloured root background showing through the gaps; per-column `.g-indent` cells with `min-width: var(--indent)` realise the lines at exact `max-content` boundaries and give sibling chevrons visibly distinct X positions per XML depth
+- **Grid View mixed-content handling** (Phase 5b.3b, Round A): Elements with attributes and a text value (e.g. `<intData allowAdjust="false" maxVal="500" minVal="3">96</intData>`) render the text as a separate `r-text` child row with an `Abc` icon when expanded, and an XMLSpy-style inline summary in the value cell when collapsed
+- **Grid View attribute-only collapsibility** (Phase 5b.3b, Round A): Elements with attributes but no children (e.g. `<foo bar="x"/>`) gain a chevron; attributes are only emitted when the element is expanded; collapsed state shows a `bar="x"` summary in the value cell
+- **Grid View text-only repeated-group column** (Phase 5b.3b, Round A): Repeated sibling elements that carry text values but no attributes/children (e.g. 9× `<plotGroupId>...</plotGroupId>`) now synthesise a `(value)` column so each text node is visible instead of rendering empty rows
+- **Grid View perf diagnostics** (Phase 5b.3b, Round A): New `XML Grid View` output channel logs `fetch/model/render/htmlSize` timings per refresh, reachable via `View → Output` without opening DevTools
+- **Grid View editable vs structural cells** (Phase 5b.3b, Round B.3): New `g-editable` class marks attribute values, element text values, and table data cells; structural cells (indent, name, row-id, headers, `(N)` summaries) now use a shaded background so the user can tell editable data from read-only scaffolding at a glance
+- **Grid View XML comments** (Phase 5b.3b, Round B.2): Comment nodes now survive the C++ engine tree walk and render as dedicated `r-comment` rows with a `<!--` icon and italic description-coloured text; comments are skipped by keyboard navigation; comments inside a table-candidate parent split the run into two table regions (`foo (3)` → comment → `foo (2)`) matching XMLSpy ordering, and comments inside a single table row (e.g. above `<x>`/`<y>`) render as a standalone comment row above the row data instead of occupying a data column
+- **Grid View pre/post-root comments** (Phase 5b.3b, Round B.2): Comments that appear at document scope (outside the root element) are now emitted by the engine as `preRootComments` / `postRootComments` and rendered above/below the root row (e.g. `<!--FEWS Donau-->` above `<Parameters>`)
+- **Grid View tree guides** (Phase 5b.3b, Round B.3): Continuous 1px vertical indent guides rendered via `background: linear-gradient` on `.g-indent` cells (`row-gap: 0` + per-cell `border-bottom` preserves horizontal separators); uses `--vscode-tree-indentGuidesStroke` to match the Explorer panel
+- **Grid View styled indent-guide bar** (Phase 5b.3b, Round B.5): Indent guide widened to 2px and fallback colour opacity raised from 0.4 to 0.75, so ancestor indent columns read as a visible styled bar (matching VS Code's Explorer reference) rather than a faint 1px hairline; still `--vscode-tree-indentGuidesStroke`-driven and still preserved across selection/hover
+
+### Changed
+- **Grid View perf — `gridView.getTreeData`** (Phase 5b.3b, Round B.4): C++ engine now serialises the tree directly to a JSON string via a purpose-built writer instead of constructing an intermediate `nlohmann::json` DOM, and computes each node's `node_id` inline during the recursive build (eliminating per-node `Element::GetPath` walks). On SpatialDisplay.xml (~20k lines, 17,971 nodes, 6.65 MB response) Debug engine total drops from ~3750 ms to ~269 ms — a 14× speedup. End-to-end extension fetch on the same file: cold (first open, includes engine spawn + first pugixml parse) ~1.68 s; warm (engine reused, document already parsed) ~0.58 s — down from ~9.9 s before. Wire output is byte-identical to the previous implementation (keys emitted in alphabetical order to match `nlohmann::json`'s default `std::map` dump order, verified by reference equality test). Env-gated `XVE_GRID_PROFILE` timing instrumentation retained (zero cost when unset) for future perf triage.
+
+### Refactor
+- **File-size cleanup** (Phase 5b.3b, Round B): Ten pre-existing source files exceeding the 500-line ceiling split into behaviour-named siblings across C++ (`schema_parser_types.cpp`, several `test_schema_*` and `test_grid_view_*` test files) and TypeScript (`xml-cursor-parser.ts`, `extension.ts`, `elements-focus.test.ts`, `completion-provider.test.ts`, and grid-renderer test files). Zero behavioural changes; all tests continue to pass. All resulting files are under 500 lines.
+- **Test names describe behaviour** (Phase 5b.3b): ~65 `TEST_CASE` / `SECTION` / `describe` / `it` / `test` display-name strings across ~20 C++ and TypeScript test files renamed from bug / round / phase codes to behaviour-descriptive labels. Catch2 tag identifiers and in-file comments referencing original issue labels are preserved for traceability. Zero production-code changes; zero test-count delta.
+
+### Fixed
+- **Grid View OFF-icon alignment + run-member indent** (Phase 5b.3b, Round 6/7): The tree-ladder table-mode-OFF icon (⊞) now sits in the same narrow gutter column that holds the table-mode-ON icon (⊟) when the run is flipped — previously it landed one track too far left, under the parent section's indent guides. In the same change, attributes and child elements of a run member (e.g. `id`, `kind`, `name`, `value`, `meta` under an `<item>` in a tree-ladder run) are now clearly indented one step to the right of their parent row, so the parent/child hierarchy is visually obvious again.
+- **Grid View hybrid-table candidacy accepts union-shape runs** (Phase 5b.3b, Round 7): Repeated-sibling element runs now qualify as hybrid tables even when members have different attribute sets or different child-element sets. The table's column set is the union of attribute names and element-child names across the run, ordered by first appearance. Members that lack a given attribute or child render an empty cell in that column. Runs of one, single-child parents, and runs split by comments still do not qualify. This lets sections like differing-attribute lists and extra-child-element lists render as tables by default instead of falling back to tree-ladder mode.
+- **Grid View table-mode-OFF icon always-on for tree-ladder runs** (Phase 5b.3b, Round 6): The ⊞ icon that flips a tree-ladder section back to a table is now always visible on every table-candidate run rendered as a tree ladder, and sits on the top element row of the run at that element's own indent depth — previously it was gated on selection and could land on an attribute row under the first run member. Non-candidate sections (single child, differing-shape siblings, runs split by comments) still never emit the icon, and a collapsed parent paints no icon. Clicking ⊞ still flips the entire run to a table.
+- **Grid View stuck on "loading..."** (Phase 5b.3b, Round 5): A regression in the webview selection-handling script left the grid showing a permanent loading state after toggling into Grid View. Fixed and covered by a new syntax smoke test that parses the emitted webview script at CI time to prevent recurrence.
+- **Grid View table-mode-OFF icon missing on hybrid-only sections** (Phase 5b.3b, Round 5): The icon used to switch a hybrid-capable section from tree mode back to table mode never appeared on sections whose children mix scalar values with sub-elements. Dispatch now treats scalar-only and hybrid-capable sections uniformly for UI purposes.
+- **Grid View table-region labels selectable** (Phase 5b.3b, Round B.6): Table-region group labels (e.g. `timeSeriesSet (39)`) are no longer dropped by selection reconcile after a document update.
+- **Grid View comment rows selectable** (Phase 5b.3b, Round B.6): Comment rows now respond to plain click and render with the theme's selection background when selected; they remain inert to arrow-key navigation but are included in Shift+Click / Shift+Arrow ranges.
+- **Grid View row selection** (Phase 5b.3b, Round B.3): Selection highlight now correctly paints the actual row cells (name, value, table data, row-id) instead of the leading `.g-indent` columns; explicit per-cell-class selectors beat the `g-editable`/`t-rowid` backgrounds, and selected-row indent cells stay structural-gray
+- **Grid View scrollbars** (Phase 5b.3b, Round B.3): Horizontal scrollbar now appears when a wide table region (e.g. `timeSeriesSet` in ImportEVN.xml) exceeds viewport width; `#grid-container` is viewport-anchored with `overflow: auto` so both axes scroll inside the grid
+- **Grid View chevrons**: Replaced codicon font dependency with Unicode ▶/▼ characters (codicons not available in webview)
+- **Grid View table group navigation**: Table region labels (e.g., `timeSeriesSet (39)`) now selectable and navigable via keyboard
+- **Grid View attribute-only elements**: Elements with attributes but no text value (e.g., `<timeStep unit="..."/ >`) now display attribute values in table cells
+- **Grid View table regions collapsed by default**: Table-mode groups (e.g., timeSeriesSet, externUnit) now start collapsed with ▶ chevron, matching non-table nodes
+- **Grid View table-region keyboard nav**: Table-region-labels use unique `#group` suffixed node IDs preventing selection conflict with first table row; ArrowDown from header enters table
+- **Grid View expandable attribute-only cells**: Attribute-only elements in table cells now render with ▶/▼ chevron; collapsed shows inline summary, expanded shows name-value sub-grid
+- **Grid View chevron indent** (Phase 5b.3b, Round A): Name-cell `padding-left` bumped to 16px and `.expand-toggle` `margin-right` to 4px so the chevron sits visibly inside the name cell with a clear gap to the left grid boundary
+- **Grid View indent hierarchy** (Phase 5b.3b, Round A): `.g-indent` cells receive `min-width: var(--indent)` so empty indent columns no longer collapse to 0 width under `max-content`; parent/child chevrons now sit ~20px apart per depth level
+
+### Fixed
+- **Grid View toggle**: Toggle command now closes the text editor before opening Grid View in the same tab position (was opening a separate tab)
+- **Grid View rendering**: Webview now renders HTML tree via GridModel/GridRenderer (was displaying raw JSON data)
+- **Grid View loading**: Added `onDidChangeViewState` handler and `retainContextWhenHidden` to prevent "Grid View loading..." stuck state when switching between tabs
+- **Grid View column ordering** (Phase 5b.2): Table columns sorted by document order across all rows
+- **Grid View name-value grid** (Phase 5b.2): Attributes and leaf children in two-column grid with visible borders
+- **Grid View nesting** (Phase 5b.2): L-bracket borders (left + bottom) for clear parent-child hierarchy
+- **Grid View restart** (Phase 5b.2): Grid view sends `document.update` before `getTreeData` on restart
+- **Grid View headers** (Phase 5b.2): Complex children as standalone headers, leaf children as grid rows; table-region-label aligned with tree-node headers
+
+### Fixed
+- **Version consistency**: Aligned project version to `0.5.0` across `CMakeLists.txt`, `vcpkg.json`, and version test
+- **CI**: Temporarily disabled macOS and Ubuntu builds (Windows-only until platform builds are fixed)
 
 ## [0.5.0] - 2026-04-10
 
 ### Added — Phase 5a: Open-Source Dual-Repo Setup
 - **Dual-repo architecture**: Private working repo + public open-source mirror (`IvoMil/xml-visual-editor`) with filtered sync
-- **Repo-sync skill** (`.github/skills/repo-sync/SKILL.md`): Documents dual-repo architecture, sync procedures, external PR integration
-- **Repo-sync-manager agent** (`.github/agents/repo-sync-manager.agent.md`): Handles sync operations, conflict resolution, public repo management
-- **`.publicignore` file**: Defines private-only patterns excluded from public sync (agents, skills, plans, resources, references, internal docs)
-- **`scripts/sync-to-public.ps1`**: PowerShell sync script — filters private repo through `.publicignore`, copies to public repo directory with clean commit
-- **`.github/workflows/sync-public.yml`**: GitHub Action for automated sync on version tag push or manual dispatch
 - **Public repo scaffolding**: Issue templates (bug report, feature request), PR template, CODE_OF_CONDUCT.md
 - **`CONTRIBUTING.md`**: Contributor guidelines with build instructions, coding standards, and architecture overview
 
 ### Changed
-- **`copilot-instructions.md`**: Added dual-repo setup section (remotes, SSH alias, sync reference)
-- **`git-workflow` skill**: Added dual-repo remotes, sync workflow, external PR integration procedures
-- **`feature-development-protocol` skill**: Added Phase 5 public sync step
-- **`workflow-orchestrator` agent**: Added Phase 5 sync workflow and repo-sync-manager awareness
 - **`vscode-extension/README.md`**: Updated 8 screenshot URLs from `xml-visual-editor-assets` repo to `xml-visual-editor` public repo path
 - **`README.md`**: Removed links to private-only docs (PROJECT_PLAN.md, SKILLS.md), fixed clone URL from SSH alias to HTTPS, added CONTRIBUTING.md link, updated project structure
-
-### Fixed
-- **Sync script encoding**: Replaced non-ASCII characters (box-drawing `─`, em dash `—`) with ASCII equivalents for PowerShell 5.1 compatibility
 
 ## [0.5.0] - 2026-03-27
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "xml-visual-editor",
-  "version-semver": "0.1.0",
+  "version-semver": "0.5.0",
   "description": "Multi-platform XML editing toolkit with XSD schema awareness",
   "dependencies": [
     "pugixml",

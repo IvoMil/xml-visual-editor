@@ -1,11 +1,12 @@
 # XML Visual Editor
 
-Multi-platform toolkit for advanced XSD schema aware XML editing.
+Multi-platform toolkit for advanced XSD schema-aware XML editing, with an XMLSpy-style hierarchical Grid View for any XML document.
 
 ## Overview
 
 XML Visual Editor is a VS Code extension / Notepad++ plugin that provides:
 - **Text View (Primary Focus)**: XML editing in VS Code and Notepad++, enriched with schema-aware assistance and contextual helpers.
+- **Grid View (Read-Only, new in 0.6.0)**: An XMLSpy-style hierarchical grid rendering of any XML document, with auto-detected tables for repeated-sibling groups, hybrid tables for mixed scalar/structural columns, row/column orientation flip, column-scoped chevron drill-down, and multi-row/column selection. Editing and bidirectional text↔grid sync are planned for the next release.
 - **Real-Time XSD Validation**: On-demand schema validation with inline problem markers (red underlines) and Problems panel integration. Validation can run automatically on edit (500ms debounce), and/or on open, and save.
 - **Schema Viewer**: A dedicated schema exploration view showing XSD structure in a collapsible 3-column table with icons, color-coded compositors, and an Info Panel for element details.
 - **Interactive Helpers**: Real-time helper panels for Elements (allowed children), Attributes (edit values) and Info (schema details) — all update on cursor move.
@@ -28,7 +29,7 @@ All platforms share a **C++ core engine** built with pugixml and nlohmann_json, 
 - JSON-RPC 2.0 server (stdin/stdout) — 23 methods across Document, Validation, Schema, and Helper categories
 - XSD validation with line/column diagnostics and element path context
 - XML formatting: Pretty-Print (pugixml `format_indent`) and Linearize (pugixml `format_raw`)
-- 148 Catch2 unit test cases (1568 assertions)
+- Catch2 unit test suite (grid-view service, hybrid candidacy, JSON writer, b1 fixture coverage)
 
 ### VS Code Extension
 - **Helper Panels** — three interactive sidebar panels that update on every cursor move:
@@ -55,12 +56,24 @@ All platforms share a **C++ core engine** built with pugixml and nlohmann_json, 
 - **Validation** — on-demand and automatic (on edit/open/save) schema validation with inline problem markers and Problems panel integration
 - **Cursor Tracking** — client-side XML context detection (9 cursor contexts A–I) with 150ms debounce
 - **Auto-Activation** — panels auto-open on XML file activation, persist across file switches and sidebar close/reopen
-- 115 Mocha tests (focus algorithm, cursor helpers, completion types, completion provider, filter rules, tag autoclose, wildcard rendering, compositor insertion)
+- **Grid View (Read-Only)** — XMLSpy-style hierarchical grid view of the active XML document:
+  - Launched via the `XML: Toggle Grid View` command or XML Actions toolbar; replaces the text editor for the document in the same tab
+  - Auto-detects repeated-sibling groups and renders them as tables with row-index column, element numbering, and distinct header/row-id styling
+  - **Hybrid tables**: runs whose members mix scalar values with sub-elements qualify as tables when they share a tag (union-shape candidacy); column set is the union of attribute and child-element names across the run
+  - **Column-scoped chevron drill-down**: chevron cells expand in place inside their own column track; nested tables (including tables inside drill-downs inside drill-downs) render with their own headers, toggle icons, and column-paint highlighting
+  - **Orientation flip**: per-section ⇆ icon flips rows↔columns while preserving selection across the flip
+  - **Tree / table mode toggle**: per-section ⊟/⊞ icons switch a section between tree-ladder mode and table mode (multi-run sections toggle independently)
+  - **Multi-row and multi-column selection** with plain-click, Ctrl+Click toggle, Shift+Click range, Shift+Arrow range-extend, Ctrl+A, Escape; row and column selection are mutually exclusive per node
+  - **Batch expand/collapse**: `+`/`-` operate on the whole selection; `+` drills one level deeper each press
+  - **Tree indent guides** + visible 1px grid lines + mixed-content row splitting (`Abc` child row for text nodes) + XML comment rows
+  - Grid state (expansions, drill-down openings, selection, toggle states) survives tab switches
+  - **Read-only in this release** — inline editing and bidirectional text↔grid sync are planned for the next phase
+- 548 Mocha tests (focus algorithm, cursor helpers, completion types, completion provider, filter rules, tag autoclose, wildcard rendering, compositor insertion, grid view model, grid view renderer, hybrid tables, column-scoped drill-down, multi-select)
 
 ### Infrastructure
 - CMake + vcpkg build system with debug/release presets
 - CI/CD pipeline (GitHub Actions) for multi-platform builds
-- Agent suite (9 agents) and skill definitions (12 skills) for AI-assisted development
+- Agent suite (10 agents) and skill definitions (12 skills) for AI-assisted development
 
 ## Plans
 
@@ -89,6 +102,10 @@ See [Project Plan](docs/PROJECT_PLAN.md) for the full roadmap (Phases 1–7).
 | 4i | Compositor Insertion & Nested Choice | ✅ Complete |
 | 4j | TS File Size Refactoring | ✅ Complete |
 | 4h | Marketplace Publishing | ✅ Complete |
+| 5b.1 | Grid View Scaffold | ✅ Complete |
+| 5b.2 | Grid View Table Mode | ✅ Complete |
+| 5b.3 | Grid View Expand/Collapse, Navigation, Hybrid Tables & Drill-Down | ✅ Complete |
+| 5b.4 | Grid View Bidirectional Sync & Inline Editing | 📋 Next |
 | 5 | Future Enhancements | 📋 Backlog |
 | 6 | Notepad++ Plugin | 📋 Backlog |
 | 7 | CLI Tools & Polish | 📋 Backlog |

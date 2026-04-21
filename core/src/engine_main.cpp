@@ -11,6 +11,7 @@ int main() {
     xve::RegisterValidationHandlers(server);
     xve::RegisterSchemaHandlers(server);
     xve::RegisterHelperHandlers(server);
+    xve::RegisterGridViewHandlers(server);
 
     server.Run();
 

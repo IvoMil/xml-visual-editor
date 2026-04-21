@@ -6,6 +6,7 @@ namespace xve {
 
 class IDocumentService;
 class IFileService;
+class IGridViewService;
 class IValidationService;
 class ISchemaService;
 class IHelperDataService;
@@ -27,6 +28,7 @@ public:
     IValidationService* GetValidationService();
     ISchemaService* GetSchemaService();
     IHelperDataService* GetHelperDataService();
+    IGridViewService* GetGridViewService();
 
 private:
     struct Impl;

@@ -16,11 +16,20 @@ struct JsonRpcResponse;
 // Throws std::runtime_error or std::invalid_argument on failure.
 using MethodHandler = std::function<nlohmann::json(const nlohmann::json& params, ServiceContainer& container)>;
 
+// Phase B.4: raw-string handler. Returns a pre-serialised JSON value that will
+// be slotted directly into the JSON-RPC response's "result" field, bypassing
+// nlohmann::json construction + dump() for large payloads (e.g.
+// gridView.getTreeData on multi-megabyte trees). The returned string MUST be a
+// valid JSON value (object, array, number, string, bool, or null). Throws the
+// same exception types as MethodHandler on failure.
+using RawMethodHandler = std::function<std::string(const nlohmann::json& params, ServiceContainer& container)>;
+
 class JsonRpcServer {
 public:
     explicit JsonRpcServer(ServiceContainer& container);
 
     void RegisterMethod(std::string method_name, MethodHandler handler);
+    void RegisterRawMethod(std::string method_name, RawMethodHandler handler);
 
     // Run the server loop: reads stdin line-by-line, writes responses to stdout, blocks until EOF.
     void Run();
@@ -31,6 +40,7 @@ public:
 private:
     ServiceContainer& container_;
     std::unordered_map<std::string, MethodHandler> methods_;
+    std::unordered_map<std::string, RawMethodHandler> raw_methods_;
 };
 
 }  // namespace xve

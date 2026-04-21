@@ -53,6 +53,7 @@ Platform-independent shared library providing all XML/XSD processing logic.
 - `services/validation_service.h` — XML validation
 - `services/file_service.h` — File I/O abstraction
 - `services/helper_data_service.h` — Cursor-context-aware panel data
+- `services/grid_view_service.h` — Grid view tree/table data computation
 - `json_rpc/server.h` — JSON-RPC 2.0 server (stdin/stdout)
 
 **Key types** (namespace `xve`):
@@ -65,6 +66,8 @@ Platform-independent shared library providing all XML/XSD processing logic.
 - `AttributesPanelData` — attributes with is_set, current_value, enum_values for UI
 - `NodeDetailsV2` — enriched element info with compositor context + instance state
 - `Diagnostic` — validation error/warning with location
+- `GridTreeNode` — hierarchical grid view node with table mode and flip state
+- `GridTableData` — tabular representation of repeated child elements
 
 ### 2. JSON-RPC Server (`core/src/json_rpc/`)
 
@@ -80,7 +83,10 @@ over stdin/stdout. Methods mirror the Service Layer API.
   insertElement, insertRequiredChildren — combines schema + document state for
   panel-ready data, schema-aware insertion, and recursive required subtree generation
 
-**Total: 21 JSON-RPC methods.**
+- **Grid View**: getTreeData, getTableRegions, updateCell, insertRow, deleteRow,
+  getNodeAtLine — structured grid data, edit operations, and focus sync
+
+**Total: 27 JSON-RPC methods.**
 
 ### 3. VS Code Extension (`vscode-extension/`)
 
@@ -99,11 +105,65 @@ TypeScript extension spawning the engine binary and providing:
 - Gutter decorations (error/warning icons) with CodeActionProvider fix suggestions
 - Font customization for panels and completion dropdown
 - Schema tree viewer (planned)
+- **Document Grid View** (XMLSpy-style) — Custom Editor for visual XML editing (toggle with Text View)
 - Commands (validate, insert element, format, etc.)
 
 **Cursor context classification stays client-side** in TypeScript — it is pure text
 parsing (not schema-dependent) and avoids per-keystroke content transfer to engine.
 Notepad++ will implement cursor context via Scintilla API.
+
+#### 3.1 Document Grid View (`vscode-extension/src/grid-view/`)
+
+A **Custom Editor** (`CustomTextEditorProvider`) that renders XML as a hierarchical
+tree+table grid, toggling with the native text editor. The user switches between
+Text View and Grid View — only one is visible at a time. Both views operate on the
+same `TextDocument`, so edits in either view are immediately available when switching.
+
+**Key design decisions:**
+- **Custom Editor API** (toggle view) — user switches between Text and Grid View via a
+  command; Custom Editor shares the underlying `TextDocument` for native undo/redo
+- **Custom MVC renderer** — the XMLSpy-style tree+table hybrid is not well-served by
+  MIT grid libraries (ag-grid Tree Data = Enterprise-only; Tabulator doesn't support
+  dynamic tree↔table toggle); MVC architecture (model/view/controller) ensures
+  maintainability
+- **Grid edits translate to WorkspaceEdit** — all grid edits go through the C++ engine,
+  which returns updated XML; the extension applies `WorkspaceEdit` to the `TextDocument`,
+  reusing native undo/redo and validation triggers
+- **Helper panels reuse same code paths** — grid node selection maps to the same cursor
+  contexts (A-I) that drive Elements/Attributes/Info panels in Text View
+
+**Capabilities:**
+- Tree view: elements as collapsible nodes, attributes as leaf items
+- Table mode: repeated elements rendered as table rows (auto-detected, user-toggleable)
+- Flip rows/columns: transpose table orientation
+- Cell editing: inline value editing with Enter/Escape
+- Row/column selection and Excel-style copy/paste
+- Expand/collapse with `+`/`-` keyboard shortcuts
+- Focus preservation when switching between Text and Grid views
+- Helper panels (Elements, Attributes, Info) work identically in both views
+- Theme-aware styling using VS Code CSS variables
+- Schema validation highlighting in grid cells
+
+**Data flow:**
+```
+Toggle: Text View ←──→ Grid View (Custom Editor) — same TextDocument
+
+Text Editor ──onDidChangeTextDocument──→ document.update ──→ C++ Engine
+                                                                │
+Grid View  ←──gridView.getTreeData────←────────────────────────┘
+    │
+    └──gridView.updateCell──→ C++ Engine ──→ returns XML ──→ WorkspaceEdit ──→ TextDocument
+```
+
+**New JSON-RPC methods** (`gridView.*` family):
+- `gridView.getTreeData` — hierarchical node structure for full document
+- `gridView.getTableRegions` — tabular data for repeated-element sections
+- `gridView.updateCell` — apply cell edit, return updated XML for WorkspaceEdit
+- `gridView.insertRow` / `deleteRow` — row operations
+- `gridView.getNodeAtLine` — line-to-node mapping for focus sync
+
+**New C++ service:** `GridViewService` in the service layer, computing tree/table
+data structures from the document model with schema-aware table mode detection.
 
 ### 4. Notepad++ Plugin (`notepad-plus-plus/`)
 

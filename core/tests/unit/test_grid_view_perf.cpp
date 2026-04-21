@@ -1,8 +1,9 @@
-// Phase B.4 perf regression test — asserts gridView.getTreeData (build +
+// Performance regression test — asserts gridView.getTreeData (build +
 // direct-to-string serialisation) on SpatialDisplay.xml completes within a
 // generous Debug-build threshold. Tagged [perf] so it can be filtered out of
 // normal CI runs if desired.
 
+#include "test_fixture_helpers.h"
 #include "xmlvisualeditor/services/document_service.h"
 #include "xmlvisualeditor/services/grid_view_service.h"
 #include "xmlvisualeditor/services/service_container.h"
@@ -11,47 +12,19 @@
 
 #include <algorithm>
 #include <chrono>
-#include <filesystem>
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
 
 using namespace xve;
 
-namespace {
-
-// Walk up from the current working directory looking for the sample fixture.
-// This mirrors the path-resolution strategy used ad-hoc by other tests that
-// operate on real files: ctest typically runs from build/*/core, so we need to
-// climb out of the build tree into the repo root.
-auto FindFixture() -> std::filesystem::path {
-    const std::filesystem::path target = "resources/sample_files/SpatialDisplay.xml";
-    auto dir = std::filesystem::current_path();
-    for (int i = 0; i < 10; ++i) {
-        if (std::filesystem::exists(dir / target)) {
-            return dir / target;
-        }
-        if (!dir.has_parent_path() || dir.parent_path() == dir) break;
-        dir = dir.parent_path();
-    }
-    return {};
-}
-
-}  // namespace
-
 TEST_CASE("GridViewService getTreeData perf on SpatialDisplay.xml", "[gridview][perf]") {
-    auto fixture = FindFixture();
+    auto fixture = xve::test::FindFixture("resources/sample_files/SpatialDisplay.xml");
     if (fixture.empty()) {
         WARN("SpatialDisplay.xml fixture not found — skipping perf test");
         return;
     }
 
-    std::ifstream f(fixture, std::ios::binary);
-    REQUIRE(f.good());
-    std::ostringstream oss;
-    oss << f.rdbuf();
-    const std::string xml = oss.str();
+    const std::string xml = xve::test::ReadFileToString(fixture);
     REQUIRE(!xml.empty());
 
     ServiceContainer container;
@@ -85,9 +58,9 @@ TEST_CASE("GridViewService getTreeData perf on SpatialDisplay.xml", "[gridview][
 
     INFO("GetTreeDataJson times (ms): "
          << millis[0] << " " << millis[1] << " " << millis[2] << " median=" << median);
-    // Generous Debug-build ceiling. Observed Debug engine-only was ~3.8s before
-    // B.4 and target ~300ms after; 1500ms absorbs CI noise without hiding
-    // regressions.
+    // Generous Debug-build ceiling. Target ~300ms after the direct-to-string
+    // optimisation (observed Debug engine-only was ~3.8s before); 1500ms
+    // absorbs CI noise without hiding regressions.
     CHECK(median < 1500.0);
 
     doc_service->CloseDocument(doc_id);

@@ -295,10 +295,10 @@ TEST_CASE("GridViewService - GetTreeData", "[grid_view]") {
     SECTION("repeated children with element great-grandchildren disqualify table candidacy") {
         // Issue F — case that does NOT qualify as a PURE table: a repeated child
         // contains an element child that itself has element children, so
-        // is_table_candidate stays false. Under Phase 5b3 B.1.a the run still
-        // qualifies as HYBRID (same shape), so is_hybrid_table_candidate flips
-        // to true and sibling_index/sibling_count are assigned so the renderer
-        // can group the region.
+        // is_table_candidate stays false. The run still qualifies as HYBRID
+        // (same shape), so is_hybrid_table_candidate flips to true and
+        // sibling_index/sibling_count are assigned so the renderer can group
+        // the region.
         auto doc_id = doc_service->OpenDocumentFromString(
             "<root>"
             "<entry><name>a</name><details><kind>x</kind></details></entry>"

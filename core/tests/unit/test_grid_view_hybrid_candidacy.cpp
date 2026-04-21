@@ -4,6 +4,7 @@
 // The parent exposes a per-run union descriptor (attr_union + child_union)
 // via GridTreeNode::table_runs.
 
+#include "test_fixture_helpers.h"
 #include "xmlvisualeditor/services/document_service.h"
 #include "xmlvisualeditor/services/grid_view_service.h"
 #include "xmlvisualeditor/services/service_container.h"
@@ -11,20 +12,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <cstddef>
-#include <fstream>
-#include <sstream>
 #include <string>
 
 using namespace xve;
 
 namespace {
-
-auto LoadFile(const std::string& path) -> std::string {
-    std::ifstream in(path);
-    std::stringstream ss;
-    ss << in.rdbuf();
-    return ss.str();
-}
 
 auto FindChildByName(const GridTreeNode& parent, const std::string& name) -> const GridTreeNode* {
     for (const auto& c : parent.children) {
@@ -183,12 +175,19 @@ TEST_CASE("GridViewService hybrid table candidacy - basic shape rules",
 
 TEST_CASE("GridViewService hybrid table candidacy - fixture integration",
           "[grid_view][hybrid_candidacy][fixture]") {
+    auto fixture = xve::test::FindFixture("resources/sample_files/grid_expand_collaps_select.xml");
+    if (fixture.empty()) {
+        WARN("grid_expand_collaps_select.xml fixture not found — skipping "
+             "(private-only fixture, excluded from public repo by .publicignore)");
+        return;
+    }
+
     ServiceContainer container;
     container.Initialize();
     auto* doc_service = container.GetDocumentService();
     auto* grid_service = container.GetGridViewService();
 
-    auto xml = LoadFile("resources/sample_files/grid_expand_collaps_select.xml");
+    auto xml = xve::test::ReadFileToString(fixture);
     REQUIRE_FALSE(xml.empty());
     auto doc_id = doc_service->OpenDocumentFromString(xml);
     REQUIRE_FALSE(doc_id.empty());

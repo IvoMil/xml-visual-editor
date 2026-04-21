@@ -2,10 +2,10 @@
  * Inline JS twin of GridSelectionModel for the webview runtime — the
  * selection-model half of the mouse-bindings twin pair.
  *
- * Split out of mouse-bindings-webview-js.ts (2026-04) to keep every
- * source file under the project's 500-line ceiling. The contents of
- * this string are concatenated verbatim ahead of the controller twin
- * by grid-view-webview-script.ts (via GRID_MOUSE_BINDINGS_JS) so the
+ * Split out of mouse-bindings-webview-js.ts to keep every source file
+ * under the project's 500-line ceiling. The contents of this string
+ * are concatenated verbatim ahead of the controller twin by
+ * grid-view-webview-script.ts (via GRID_MOUSE_BINDINGS_JS) so the
  * emitted `<script>` body is byte-equivalent to the pre-split version.
  *
  * CANONICAL TYPESCRIPT SOURCE (keep in sync — any semantic change must
@@ -26,20 +26,19 @@ function __mkSelection() {
   var nodeIds = new Set();
   var anchor = null;
   var activeCursor = null;
-  /* Z9 — captured content fingerprints per selected id. */
+  /* Captured content fingerprints per selected id. */
   var fingerprints = new Map();
-  /* B.1.e / Q7 — synthetic column ids (kind='column'). Parallel to
-   * nodeIds (row axis). Survive reconcile iff their parent is still
-   * rendered. B.1.h — carry anchor + activeCursor for Shift/Ctrl range
-   * extension, mirroring the row-axis fields above. Mutual exclusion
-   * (Invariant I3): every row-adding mutator clears columns first, and
-   * vice versa. */
+  /* Synthetic column ids (kind='column'). Parallel to nodeIds (row
+   * axis). Survive reconcile iff their parent is still rendered. Carry
+   * anchor + activeCursor for Shift/Ctrl range extension, mirroring
+   * the row-axis fields above. Mutual exclusion: every row-adding
+   * mutator clears columns first, and vice versa. */
   var columns = new Set();
   var columnAnchor = null;
   var columnCursor = null;
-  /* B.1.e / D0.1 — first reconcile on a fresh doc leaves the selection
-   * empty (no fallback to first visible id). Flipped true by any
-   * mutator AND at the end of every reconcile. */
+  /* First reconcile on a fresh doc leaves the selection empty (no
+   * fallback to first visible id). Flipped true by any mutator AND at
+   * the end of every reconcile. */
   var initialReconcileDone = false;
 
   function clearInternal() {
@@ -77,8 +76,9 @@ function __mkSelection() {
     get columnActiveCursor() { return columnCursor; },
     has: function(id) { return nodeIds.has(id); },
     hasColumn: function(cid) { return columns.has(cid); },
-    /* B.1.h — column-axis mutators (twin of GridSelectionModel). Each
-     * add-path call clears the row axis first to enforce Invariant I3. */
+    /* Column-axis mutators (twin of GridSelectionModel). Each add-path
+     * call clears the row axis first to enforce row/column mutual
+     * exclusion. */
     selectColumn: function(cid) {
       clearRowAxis();
       columns = new Set([cid]); columnAnchor = cid; columnCursor = cid;
@@ -172,7 +172,7 @@ function __mkSelection() {
       var c = activeCursor; nodeIds = new Set([c]); anchor = c;
       initialReconcileDone = true;
     },
-    /* Z10 — preserve existing anchor + cursor when still present in
+    /* Preserve existing anchor + cursor when still present in
      * visibleIds; only fall back to anchorHint (when present in set) or
      * the first visible id when the previous value was dropped. */
     selectAll: function(visibleIds, anchorHint) {
@@ -194,8 +194,8 @@ function __mkSelection() {
       if (wasEmpty) { anchor = ids[0]; activeCursor = ids[0]; }
       initialReconcileDone = true;
     },
-    /* Z12 — symmetric bulk remove. Drops every id in ids and falls
-     * the cursor/anchor back to the anchor (when still present) or the
+    /* Symmetric bulk remove. Drops every id in ids and falls the
+     * cursor/anchor back to the anchor (when still present) or the
      * first surviving id; clears on empty. Mirror of
      * GridSelectionModel.removeIds in grid-selection.ts. */
     removeIds: function(ids) {
@@ -214,7 +214,7 @@ function __mkSelection() {
       }
       if (!anchorSurvived) anchor = activeCursor;
     },
-    /* Z9 — capture fingerprints for current selection; preserves
+    /* Capture fingerprints for current selection; preserves
      * already-captured values (selection-time semantics). */
     captureFingerprints: function(freshMap) {
       var next = new Map();
@@ -230,7 +230,7 @@ function __mkSelection() {
     },
     getFingerprints: function() { return new Map(fingerprints); },
     reconcile: function(existingIds, fallbackFirstVisibleId) {
-      /* Z5c: existingIds is doc-ordered; keep surviving ids in that order. */
+      /* existingIds is doc-ordered; keep surviving ids in that order. */
       var existingArr = Array.isArray(existingIds)
         ? existingIds
         : Array.from(existingIds);
@@ -240,7 +240,7 @@ function __mkSelection() {
         if (nodeIds.has(existingArr[ei])) survivingOrdered.push(existingArr[ei]);
       }
       if (survivingOrdered.length === 0) {
-        /* D0.1 — first reconcile on a fresh doc: stay empty. */
+        /* First reconcile on a fresh doc: stay empty. */
         if (!initialReconcileDone) {
           clearInternal();
           initialReconcileDone = true;
@@ -272,8 +272,8 @@ function __mkSelection() {
       if (!anchorSurvived) anchor = activeCursor;
       initialReconcileDone = true;
     },
-    /* Z9 round-4 re-fix — REMAP-by-fingerprint reconcile. Canonical
-     * algorithm in grid-selection.ts reconcileWithFingerprints. */
+    /* REMAP-by-fingerprint reconcile. Canonical algorithm in
+     * grid-selection.ts reconcileWithFingerprints. */
     reconcileWithFingerprints: function(existingIds, freshMap, fallbackFirstVisibleId) {
       var existingArr = Array.isArray(existingIds)
         ? existingIds : Array.from(existingIds);
@@ -327,7 +327,7 @@ function __mkSelection() {
         return null;
       }
       if (survivingOrdered.length === 0) {
-        /* D0.1 — first reconcile on a fresh doc: stay empty. */
+        /* First reconcile on a fresh doc: stay empty. */
         if (!initialReconcileDone) {
           clearInternal();
           initialReconcileDone = true;

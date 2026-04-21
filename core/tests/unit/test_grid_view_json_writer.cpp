@@ -9,8 +9,8 @@ using namespace xve;
 
 namespace {
 
-// Mirror of the pre-B.4 nlohmann::json-based serialiser. Kept local to this
-// test file so we can assert the B.4 direct-to-string writer emits the SAME
+// Mirror of the legacy nlohmann::json-based serialiser. Kept local to this
+// test file so we can assert the direct-to-string writer emits the SAME
 // shape (field names, order, types) for a variety of node constructs.
 auto ReferenceToJson(const GridTreeNode& node) -> nlohmann::json {
     nlohmann::json j;

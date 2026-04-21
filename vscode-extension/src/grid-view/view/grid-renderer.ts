@@ -11,14 +11,14 @@ import { groupChildSegments } from './group-table-runs';
 
 /** Renders the grid model as a flat row list under a single CSS Grid root */
 export class GridRenderer {
-  /** B.1.d — optional session-scoped toggle state. Absent ⇒ engine
-   *  defaults apply (table-mode ON for every table candidate, flip OFF). */
+  /** Optional session-scoped toggle state. Absent ⇒ engine defaults
+   *  apply (table-mode ON for every table candidate, flip OFF). */
   private toggleState: ToggleState | undefined;
 
-  /** B.1.e / Q9 — optional axis-aware selection snapshot, used to stamp
-   *  `.selected` / `.column-selected` onto table-region cells at emit
-   *  time. Absent ⇒ emitters skip axis-aware class stamping (legacy
-   *  runtime `applySelection` still handles row-axis highlighting on
+  /** Optional axis-aware selection snapshot, used to stamp `.selected`
+   *  / `.column-selected` onto table-region cells at emit time. Absent
+   *  ⇒ emitters skip axis-aware class stamping (legacy runtime
+   *  `applySelection` still handles row-axis highlighting on
    *  `.g-row[data-node-id]` after the DOM is live). */
   private selection: GridSelectionModel | undefined;
 
@@ -128,7 +128,7 @@ export class GridRenderer {
     isNonLeaf = false,
     valueEditable = false,
   ): void {
-    // Placement (see docs/designs/DESIGN_GRID_ALIGNMENT.md §1.1):
+    // Placement:
     //   Non-leaf at D    : name (D+1)/-1     (full remaining width, no value cell)
     //   Leaf/attr at D   : name (D+1)/(D+2)  value (D+2)/-1
     const nameGridCol = isNonLeaf ? `${depth + 1} / -1` : `${depth + 1} / ${depth + 2}`;
@@ -435,7 +435,7 @@ export class GridRenderer {
    *  directly into a containing grid. Used by `emitDrillBox` to render a
    *  chevron host's subtree inside a self-contained drill-box grid item.
    *  The node's own header row is NOT emitted — the header is already
-   *  present as the enclosing table data row's chevron cell (Q6=B).
+   *  present as the enclosing table data row's chevron cell.
    *
    *  Always uses segmented children so same-name runs render as
    *  hybrid/scalar tables even when the host itself isn't flagged as

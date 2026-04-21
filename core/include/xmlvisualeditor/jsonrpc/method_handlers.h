@@ -4,7 +4,7 @@ namespace xve {
 
 class JsonRpcServer;
 
-// Register all Phase 1 JSON-RPC method handlers.
+// Register all JSON-RPC method handlers on the given server.
 void RegisterDocumentHandlers(JsonRpcServer& server);
 void RegisterValidationHandlers(JsonRpcServer& server);
 void RegisterSchemaHandlers(JsonRpcServer& server);

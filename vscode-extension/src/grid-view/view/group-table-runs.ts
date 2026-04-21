@@ -11,7 +11,7 @@ import { GridNode } from '../model/grid-node';
  *  - `comment` : a comment pseudo-child. Always its own segment — comments
  *                terminate the surrounding run.
  *
- *  The grouping rule (Round B contiguous-run semantics, mandated by the
+ *  The grouping rule (contiguous-run semantics, mandated by the
  *  engine's per-run `siblingIndex` / `siblingCount`):
  *
  *    > A contiguous block of children where each is `type === "element"`

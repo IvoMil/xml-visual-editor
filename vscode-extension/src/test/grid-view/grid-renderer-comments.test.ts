@@ -21,7 +21,7 @@ function makeNodeData(overrides: Partial<GridTreeNodeData> = {}): GridTreeNodeDa
   };
 }
 
-/** Round B.2 — XML comment pseudo-rows rendered by the grid renderer. */
+/** XML comment pseudo-rows rendered by the grid renderer. */
 suite('GridRenderer — XML comment rows', () => {
   let renderer: GridRenderer;
 

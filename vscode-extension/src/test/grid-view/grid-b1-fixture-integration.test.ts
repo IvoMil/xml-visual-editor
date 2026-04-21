@@ -5,7 +5,7 @@ import { createToggleState } from '../../grid-view/model/toggle-state';
 import { makeNodeData } from './grid-renderer.test-helpers';
 
 /**
- * B.1.f fixture integration — exercises the eight sections in
+ * Fixture integration — exercises the eight sections in
  * resources/sample_files/grid_b1_hybrid_tables.xml by building
  * equivalent GridModel snapshots and asserting the renderer emits
  * the expected table shape (row × column) or tree ladder.

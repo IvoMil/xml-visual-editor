@@ -15,10 +15,10 @@ import { groupChildSegments } from '../view/group-table-runs';
  * This helper preserves that semantics for the real-node ids AND
  * additionally emits:
  *   - synthesized `{firstChild.nodeId}#group` ids for every contiguous
- *     multi-element run under a table-candidate parent (B.6 bug fix —
- *     without these, a selected `.r-tregion-label` header row loses its
- *     `.selected` class after the host-driven re-render that a batch
- *     `+` / `-` triggers).
+ *     multi-element run under a table-candidate parent (without these,
+ *     a selected `.r-tregion-label` header row loses its `.selected`
+ *     class after the host-driven re-render that a batch `+` / `-`
+ *     triggers).
  *   - attribute-row ids (`{parent.nodeId}/@{name}`) for every attribute.
  *   - synthesized `{parent.nodeId}/#text` ids for mixed-content text rows.
  *

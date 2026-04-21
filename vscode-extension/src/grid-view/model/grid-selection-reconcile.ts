@@ -1,11 +1,11 @@
 /**
- * B.1.e — Fingerprint-reconcile algorithm extracted from
- * `grid-selection.ts` to keep both files under the project's 500-line
- * ceiling. Pure logic — no class; mutates the caller's state object
- * in place. See `GridSelectionModel.reconcileWithFingerprints` for the
- * thin wrapper that forwards to this function.
+ * Fingerprint-reconcile algorithm extracted from `grid-selection.ts` to
+ * keep both files under the project's 500-line ceiling. Pure logic —
+ * no class; mutates the caller's state object in place. See
+ * `GridSelectionModel.reconcileWithFingerprints` for the thin wrapper
+ * that forwards to this function.
  *
- * Algorithm (Z9 round-4 re-fix, canonical):
+ * Algorithm (canonical):
  *   1. Build reverse index `Map<fingerprint, freshNodeId>` from the
  *      fresh fingerprint map; first fresh id in doc order wins on
  *      duplicate fp.
@@ -17,9 +17,9 @@
  *        (c) DROP.
  *   3. Rebuild fingerprint map under new ids; remap anchor + cursor
  *      the same way.
- *   4. D0.1 (B.1.e): when the remapped selection is empty AND this is
- *      the first reconcile on a fresh doc, stay empty (skip fallback).
- *      Otherwise fall back to `fallbackFirstVisibleId` (legacy Z5c).
+ *   4. When the remapped selection is empty AND this is the first
+ *      reconcile on a fresh doc, stay empty (skip fallback). Otherwise
+ *      fall back to `fallbackFirstVisibleId`.
  */
 
 /** Mutable state bag operated on by `reconcileWithFingerprintsInPlace`. */
@@ -86,7 +86,7 @@ export function reconcileWithFingerprintsInPlace(
     return null;
   };
   if (survivingOrdered.length === 0) {
-    // D0.1 — first reconcile on a fresh doc: stay empty.
+    // First reconcile on a fresh doc: stay empty.
     if (!state.initialReconcileDone) {
       state.nodeIds = new Set();
       state.anchor = null;

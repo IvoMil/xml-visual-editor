@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Public-CI Windows build failure**: Two C++ Catch2 tests (`GridViewService hybrid table candidacy - fixture integration` and `GridViewService hybrid candidacy on multi-section fixture file`) now skip gracefully with a `WARN` message when their XML fixture files are not reachable, mirroring the pre-existing pattern in `test_grid_view_perf.cpp`. On local / private-CI environments (where fixtures under `resources/sample_files/` are present) the tests still run the full assertion set (240 assertions). Introduces a shared `core/tests/unit/test_fixture_helpers.h` header exposing `xve::test::FindFixture` and `xve::test::ReadFileToString`. No runtime or user-facing behaviour change.
+
+### Changed
+- Roadmap: inserted Sub-Phase 5b.3c (Annotation Cleanup & Standards Codification) before Sub-Phase 5b.4, to remove process-historical comment tokens from `core/` and `vscode-extension/src/` on a clean baseline prior to bidirectional-sync work. No user-facing behaviour change.
+- **Annotation cleanup**: stripped process-historical comment tokens (round/decision/section refs) from production source under `core/` and `vscode-extension/src/` (including all Mocha test files under `vscode-extension/src/test/grid-view/`). Comment-only and test-display-string refactor — no behavioural change. Full Catch2 suite (159/159) and Mocha suite (548/548) remain green. New `scripts/check-annotations.ps1` lint gate is wired into `scripts/quality_check.ps1` to prevent regressions; the gate's detection regex matches `Round N`, `Phase N`, `Z\d`, `Q\d`, `B.\d`, `C\d.`, `§\d`, and `Iteration N` tokens.
+
+### Fixed
+- **Public CI fixture-loading tests** were failing on `windows-latest` because `core/tests/unit/test_grid_view_b1_fixture.cpp` and the "fixture integration" test case in `core/tests/unit/test_grid_view_hybrid_candidacy.cpp` hard-required a fixture file under `resources/` (which is excluded from the public repo via `.publicignore`). Both tests now use a new shared helper `core/tests/unit/test_fixture_helpers.h` that walks parent directories looking for the fixture and `WARN()`-skips the test when it is absent, mirroring the pattern already used by `test_grid_view_perf.cpp`. Behaviour on the private repo is unchanged: 159/159 tests still pass with full assertion coverage.
+
 ## [0.6.0] - 2026-04-21
 
 ### Highlights

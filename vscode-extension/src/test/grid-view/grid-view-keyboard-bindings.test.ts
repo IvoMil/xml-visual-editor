@@ -8,7 +8,7 @@ import {
 import { GridSelectionSnapshot } from '../../grid-view/model/grid-selection';
 
 /**
- * B.6.c — Keyboard multi-select bindings.
+ * Keyboard multi-select bindings.
  *
  * The webview script wires Shift+Arrow / Shift+Home / Shift+End / Escape /
  * Ctrl+A onto the same GridMouseController instance that owns the
@@ -17,7 +17,7 @@ import { GridSelectionSnapshot } from '../../grid-view/model/grid-selection';
  * bailout helper used by the Ctrl+A glue.
  *
  * Comment rows are INCLUDED in the ordered list passed to extendRangeTo
- * per DESIGN_GRID_MULTI_SELECT §0 Q2.
+ * per DESIGN_GRID_MULTI_SELECT.
  */
 
 interface FakeRow {

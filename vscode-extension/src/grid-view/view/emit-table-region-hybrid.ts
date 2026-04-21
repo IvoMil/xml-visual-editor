@@ -212,13 +212,13 @@ function emitHybridUnflipped(
   }
 }
 
-/** Emit a FLIPPED hybrid table region (B.1.d / Q4=C): rows and columns
- *  interchanged. The header row's data cells contain the ORIGINAL row
- *  ids (1..N). Each subsequent data row corresponds to one ORIGINAL
- *  column (attr name or element name). Chevron cells keep their child
- *  nodeId so `toggleExpand` still drives `GridNode.isExpanded`; when a
- *  chevron is expanded we inject a `.g-drill-box` at the host's grid
- *  column in the outer row band below the owning flipped row. */
+/** Emit a FLIPPED hybrid table region: rows and columns interchanged.
+ *  The header row's data cells contain the ORIGINAL row ids (1..N).
+ *  Each subsequent data row corresponds to one ORIGINAL column (attr
+ *  name or element name). Chevron cells keep their child nodeId so
+ *  `toggleExpand` still drives `GridNode.isExpanded`; when a chevron
+ *  is expanded we inject a `.g-drill-box` at the host's grid column
+ *  in the outer row band below the owning flipped row. */
 function emitHybridFlipped(
   nodes: readonly GridNode[],
   cols: readonly HybridColumn[],
@@ -258,9 +258,9 @@ function emitHybridFlipped(
     const klass = col.kind === 'attr' ? 'attr-col-header' : 'elem-col-header';
     const prefix = col.kind === 'attr' ? '=' : '&lt;&gt;';
     const cellColKind: 'attr' | 'elem' = col.kind === 'attr' ? 'attr' : 'elem';
-    // B.1.e / Q9 — flipped view: the visual row corresponds to an
-    // ORIGINAL column, so a column-kind selection (axis → 'selected')
-    // highlights the whole visual-row wrapper.
+    // Flipped view: the visual row corresponds to an ORIGINAL column,
+    // so a column-kind selection (axis → 'selected') highlights the
+    // whole visual-row wrapper.
     const wrapperAxis =
       N > 0
         ? resolveCellAxisClass(
@@ -347,14 +347,13 @@ function emitHybridFlipped(
 /** Emit a hybrid table region: like scalar but chevron-bearing element
  *  columns render a chevron cell whose expanded state injects a
  *  `.g-drill-box` wrapper at the host column in the outer row band
- *  below the data row. See `docs/designs/DESIGN_GRID_ALIGNMENT.md`
- *  §9.0 Q1/Q2/Q6. When `flipped` is true, rows and columns are
- *  interchanged (Q4=C): renderer-side HTML rebuild.
+ *  below the data row. When `flipped` is true, rows and columns are
+ *  interchanged via a renderer-side HTML rebuild.
  *
- *  Round 7 / §9.8 — if `tableRuns` is provided and carries an entry for
- *  this run's tag, columns are derived from `attrUnion`/`childUnion`
- *  instead of the first member's shape. Rows that lack a given column
- *  render an empty cell at the correct grid track. */
+ *  If `tableRuns` is provided and carries an entry for this run's tag,
+ *  columns are derived from `attrUnion`/`childUnion` instead of the
+ *  first member's shape. Rows that lack a given column render an empty
+ *  cell at the correct grid track. */
 export function emitTableRegionHybrid(
   nodes: readonly GridNode[],
   depth: number,
@@ -385,10 +384,10 @@ export function emitTableRegionHybrid(
 
 /** True iff this run should render in hybrid mode.
  *
- *  Primary signal: the engine's B.1.a `isHybridTableCandidate` flag on any
- *  member. Fallback (for pre-B.1.a engine binaries / unit-test fixtures
- *  that do not set the flag): any element-child contains sub-elements —
- *  i.e. a true structural nested case. Attribute-only element-children
+ *  Primary signal: the engine's `isHybridTableCandidate` flag on any
+ *  member. Fallback (for older engine binaries / unit-test fixtures
+ *  that do not set the flag): any element-child contains sub-elements
+ *  — i.e. a true structural nested case. Attribute-only element-children
  *  without the flag continue to render via the legacy scalar inline
  *  `cell-nv` path for backwards compatibility. */
 export function isHybridRun(run: readonly GridNode[]): boolean {

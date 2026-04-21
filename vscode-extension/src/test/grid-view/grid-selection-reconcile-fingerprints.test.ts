@@ -2,10 +2,10 @@ import { strict as assert } from 'assert';
 import { GridSelectionModel } from '../../grid-view/model/grid-selection';
 
 /**
- * Z9 content-fingerprint reconcile tests.
+ * Content-fingerprint reconcile tests.
  *
- * Split out of grid-selection-model.test.ts (2026-04-20, round-4
- * re-fix) to keep both files under the project's 500-line ceiling.
+ * Split out of grid-selection-model.test.ts to keep both files under
+ * the project's 500-line ceiling.
  * Covers:
  *   - identity-preserved survival
  *   - remap-by-fingerprint for deleted-and-reindexed siblings
@@ -120,7 +120,7 @@ suite('content-fingerprint reconcile — selection ids survive when fingerprints
 
   test('remap: two selected ids with identical fingerprints both map to the same fresh id (documented tolerated behaviour)', () => {
     // Two old selection ids with identical fp both map to the first
-    // fresh id carrying that fp. Accepted behaviour for B.6; TODO to
+    // fresh id carrying that fp. Accepted behaviour; TODO to
     // disambiguate once fp format grows a stable disambiguator.
     const sel = new GridSelectionModel();
     sel.toggle('/root/item[1]');

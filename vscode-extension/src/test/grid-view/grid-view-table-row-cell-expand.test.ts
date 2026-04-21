@@ -8,19 +8,18 @@ import {
 } from '../../grid-view/scripts/batch-expand-helpers';
 
 /**
- * B.6 second post-verification round — Issue Y (`+` on a row inside a
- * table region triggers the row's chevron-bearing cells to expand /
- * collapse, leaving the row in the table) and the supporting helpers
- * for Issue X (selection growth on `+`).
+ * Table-row `+`/`-` expand/collapse: `+` on a row inside a table region
+ * triggers the row's chevron-bearing cells to expand/collapse, leaving
+ * the row in the table.
  *
  * The webview's `+`/`-` keydown handler:
  *   1. Partitions the selection into TREE ids vs TABLE-ROW ids by DOM
  *      class (`r-trow` discriminator).
  *   2. For TREE ids on `+`, snapshots which are currently collapsed
- *      → these become the "growth parents" (Issue X seed).
+ *      → these become the "growth parents".
  *   3. For TABLE-ROW ids, walks each row's `.expand-toggle.cell-toggle`
  *      chevrons and picks the children whose state needs to flip under
- *      the direction guard (Q5).
+ *      the direction guard.
  *   4. Posts ONE batchToggleExpand to the host with
  *      `[...treeIds, ...cellChildIds]`. Note: the table-row id itself
  *      is NEVER in the post — only the chevron-children of its cells.

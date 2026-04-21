@@ -3,16 +3,16 @@
  * grid-view-webview-script.ts. Extracted so the partition / cell-chevron
  * collection / growth logic can be unit tested without a real DOM.
  *
- * Issues addressed (B.6 second post-verification round):
- *   - Issue X (selection growth on `+`): when the batch expands a
- *     selected tree node, its newly-revealed direct children should join
- *     the selection set so a second `+` drills further. `directChildIdsOf`
+ * Issues addressed:
+ *   - Selection growth on `+`: when the batch expands a selected tree
+ *     node, its newly-revealed direct children should join the
+ *     selection set so a second `+` drills further. `directChildIdsOf`
  *     gives the list to add for one parent; `pickGrowthParents` filters
  *     the original selection to the ids that will actually expand under
  *     the direction-guarded batch.
- *   - Issue Y (`+` on a row inside a table region): the row stays in the
- *     table; cells with chevrons grow vertically. `partitionByTableRow`
- *     splits the selected ids into "tree" vs "table-row" buckets, and
+ *   - `+` on a row inside a table region: the row stays in the table;
+ *     cells with chevrons grow vertically. `partitionByTableRow` splits
+ *     the selected ids into "tree" vs "table-row" buckets, and
  *     `collectCellChildIdsToFlip` walks each table row's chevron-bearing
  *     cells under the same direction guard the host applies for tree
  *     ids.
@@ -31,8 +31,8 @@
  *  `data-node-id` so they never make it into a selection anyway).
  *
  *  Ids whose row is not in the DOM at all are treated as TREE ids — they
- *  are the historic Q6 hidden-descendant case which the host already
- *  handles atomically.
+ *  are the hidden-descendant case which the host already handles
+ *  atomically.
  */
 export function partitionByTableRow(
   ids: readonly string[],
@@ -52,8 +52,8 @@ export function partitionByTableRow(
 
 /** From a list of TREE ids, pick those that will actually expand under a
  *  direction-guarded `+` batch — i.e. ids that are currently collapsed.
- *  Used as the seed list for selection growth (Issue X): only nodes that
- *  the batch ACTUALLY expands contribute their newly-visible children.
+ *  Used as the seed list for selection growth: only nodes that the
+ *  batch ACTUALLY expands contribute their newly-visible children.
  *
  *  No-op for `-` — the caller never grows on collapse. Returning an
  *  empty array would be the same behaviour, but the signature documents
@@ -110,12 +110,12 @@ export function collectCellChildIdsToFlip(
  *  derives this from the rendered DOM's `.g-row[data-node-id]` order
  *  (with `data-depth` parsed).
  *
- *  Optional `isExpanded` is required only by `pickInnermostExpanded`
- *  (Z7) so every row's expansion state can participate in the deepest-
- *  expanded-descendant walk — including expanded rows that are NOT
- *  themselves in the selection.
+ *  Optional `isExpanded` is required only by `pickInnermostExpanded` so
+ *  every row's expansion state can participate in the deepest-expanded-
+ *  descendant walk — including expanded rows that are NOT themselves in
+ *  the selection.
  *
- *  Z14 additions (synthesized `#group` table-region roots):
+ *  Additions for synthesized `#group` table-region roots:
  *    - `isTableRow` — true when the DOM element carries the `.r-trow`
  *      class. Used to extend the subtree boundary of a `#group` root
  *      across same-depth table-data rows.
@@ -132,8 +132,8 @@ export interface RowDepthEntry {
   cellChevrons?: ReadonlyArray<{ childId: string; isExpanded: boolean }>;
 }
 
-/** Z14 — synthesized-`#group` id predicate. The grid renderer emits
- *  these ids as `${firstChild.nodeId}#group` (see grid-renderer.ts
+/** Synthesized-`#group` id predicate. The grid renderer emits these
+ *  ids as `${firstChild.nodeId}#group` (see grid-renderer.ts
  *  emitTableChildren). They are tree-ish from a selection point of view
  *  (not `.r-trow`) but host a flat list of same-depth `.r-trow` data
  *  rows beneath them. */
@@ -149,8 +149,8 @@ export function isGroupRootId(id: string): boolean {
  *  Includes attribute rows (`…/@name`), text rows (`…/#text`), table
  *  data rows (`r-trow`) and the `…#group` table-region label rows —
  *  every kind that carries a `data-node-id` and renders one depth deeper
- *  than the parent. This is the Issue X "newly-visible direct children"
- *  set the selection grows into.
+ *  than the parent. This is the "newly-visible direct children" set the
+ *  selection grows into.
  *
  *  Returns an empty array when `parentId` is not in the list or has no
  *  immediate children at the expected depth. */
@@ -184,7 +184,7 @@ export function directChildIdsOf(
 }
 
 /**
- * Z1 / Z2 — renderable-id delta used by the selection-growth pass.
+ * Renderable-id delta used by the selection-growth pass.
  *
  * Given the ordered list of renderable ids BEFORE a batch `+` and the
  * ordered list AFTER the host re-rendered, return every newly-revealed
@@ -211,7 +211,7 @@ export function computeIdDelta(
 }
 
 /** Expanded-row descriptor — retained for backwards compatibility with
- *  earlier callers; `pickInnermostExpanded` (Z7) now accepts a plain
+ *  earlier callers; `pickInnermostExpanded` now accepts a plain
  *  `selectedIds` array and reads expansion state off `RowDepthEntry`. */
 export interface ExpandedRowEntry {
   id: string;
@@ -220,18 +220,18 @@ export interface ExpandedRowEntry {
 }
 
 /**
- * Z3 / Z7 / Z14 — pick the INNERMOST expanded rows for a batch `-`,
- * PER SELECTION BRANCH.
+ * Pick the INNERMOST expanded rows for a batch `-`, PER SELECTION
+ * BRANCH.
  *
- * Algorithm (Z14 refinement — 2026-04-20):
+ * Algorithm:
  *   1. Identify every selected row that is currently expanded in the
  *      DOM (the "selected+expanded" set). These are the roots from
  *      which we search for deeper expansion frontiers.
  *   2. Compute each selected+expanded row's SUBTREE SPAN. For ordinary
  *      element roots the span ends at the first row with depth
- *      ≤ rootDepth (Z7). For synthesized `#group` roots the span
- *      extends across same-depth `.r-trow` table-data rows and ends at
- *      the first row whose depth is < rootDepth OR whose depth equals
+ *      ≤ rootDepth. For synthesized `#group` roots the span extends
+ *      across same-depth `.r-trow` table-data rows and ends at the
+ *      first row whose depth is < rootDepth OR whose depth equals
  *      rootDepth AND is NOT an `.r-trow`.
  *   3. Determine the SELECTION ROOTS = selected+expanded rows whose
  *      strict-span ancestors in the selected+expanded set are ABSENT.
@@ -264,7 +264,7 @@ export function pickInnermostExpanded(
   if (selExpIdx.length === 0) return [];
 
   // Memoized subtree-end index per root (exclusive). Honors the
-  // `#group` same-depth `.r-trow` extension (Z14).
+  // `#group` same-depth `.r-trow` extension.
   const endCache = new Map<number, number>();
   const getSubtreeEnd = (rootIdx: number): number => {
     const cached = endCache.get(rootIdx);

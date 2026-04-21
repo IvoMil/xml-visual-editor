@@ -12,7 +12,7 @@
  * emitted `<script>` body is byte-equivalent to the pre-split version.
  *
  * Despite the historical "mouse-bindings" file name, this twin now also
- * exposes keyboard-driven selection primitives (B.6.c) — Shift-Arrow /
+ * exposes keyboard-driven selection primitives — Shift-Arrow /
  * Shift-Home / Shift-End range extension, Escape collapse-to-cursor, and
  * Ctrl+A / Cmd+A select-all-visible. Renaming the file is deferred to
  * minimise churn across the webview wiring; the canonical TS source in
@@ -39,7 +39,7 @@ const GRID_MOUSE_BINDINGS_CONTROLLER_JS = String.raw`
 /* ---- DOM adapter + GridMouseController twin ---- */
 function __installGridController(container, vscode) {
   var selection = __mkSelection();
-  /* Z9 — latest fingerprint map from host (set on each reconcileSelection
+  /* Latest fingerprint map from host (set on each reconcileSelection
    * message). Controller captures from this after every mutation so
    * newly-added ids have a baseline fingerprint. */
   var latestFingerprints = new Map();
@@ -65,7 +65,7 @@ function __installGridController(container, vscode) {
     );
     return (el && el.getAttribute('data-node-type')) || 'element';
   }
-  /* Z8 — read the row's own expand-toggle state. Mirrors the canonical
+  /* Read the row's own expand-toggle state. Mirrors the canonical
    * GridView.isRowExpanded. Uses the scoped child query first so a
    * header's own chevron wins over any cell chevron inside a table
    * region rendered below. */
@@ -79,7 +79,7 @@ function __installGridController(container, vscode) {
     if (!t) t = el.querySelector('.expand-toggle');
     return !!(t && t.getAttribute('data-expanded') === 'true');
   }
-  /* Z8 / Z13 — collect visible descendant ids in DOM order.
+  /* Collect visible descendant ids in DOM order.
    *  - Ordinary expanded element headers: children are at depth+1 so
    *    we walk forward including any g-row with data-depth strictly
    *    greater than the clicked depth and stop on the first row at
@@ -108,7 +108,7 @@ function __installGridController(container, vscode) {
         var cd = parseInt(cursor.getAttribute('data-depth') || '0', 10);
         if (cd < rootDepth) break;
         if (cd === rootDepth) {
-          /* Z13: keep walking across the table region only when the
+          /* Keep walking across the table region only when the
            * clicked row is a #group header AND the current sibling is
            * a table-region row (r-trow covers both the t-header
            * column-labels row and the data rows). */
@@ -139,9 +139,9 @@ function __installGridController(container, vscode) {
     }
     /* Column-axis paint. Every element carrying data-column-id is
      * eligible: a flipped-row wrapper (.g-row) takes .selected when
-     * the column is selected (Q9 axis swap), a header cell takes
-     * .column-selected. Elements that are neither (defensive) are left
-     * untouched. */
+     * the column is selected (axis swap in flip mode), a header cell
+     * takes .column-selected. Elements that are neither (defensive)
+     * are left untouched. */
     var colEls = container.querySelectorAll('[data-column-id]');
     for (var c = 0; c < colEls.length; c++) {
       var cid = colEls[c].getAttribute('data-column-id');
@@ -233,17 +233,16 @@ function __installGridController(container, vscode) {
       var plain = !mods.ctrl && !mods.shift;
       if (plain) {
         selection.replaceWith(nodeId);
-        /* Z8 / Z13 — plain click auto-grow trigger is DOM-based: we
-         * skip the old isRowExpandedById gate and include the visible
-         * descendants whenever the walk returns a non-empty list. This
-         * covers ordinary expanded element headers AND synthesized
-         * #group table-region headers. */
+        /* Plain click auto-grow trigger is DOM-based: we include the
+         * visible descendants whenever the walk returns a non-empty
+         * list. This covers ordinary expanded element headers AND
+         * synthesized #group table-region headers. */
         var desc = getVisibleDescendantIds(nodeId);
         if (desc.length > 0) selection.addIds(desc);
       } else if (mods.ctrl) {
-        /* Z12 — symmetric "toggle subtree" for expanded headers:
-         * union-add header + visible descendants on add, bulk-remove
-         * header + visible descendants on remove. Leaves and collapsed
+        /* Symmetric "toggle subtree" for expanded headers: union-add
+         * header + visible descendants on add, bulk-remove header +
+         * visible descendants on remove. Leaves and collapsed
          * headers fall back to single-id toggle. */
         var wasSelected = selection.has(nodeId);
         var cdesc = getVisibleDescendantIds(nodeId);
@@ -268,9 +267,9 @@ function __installGridController(container, vscode) {
       selection.reconcile(existingIds, fallback == null ? null : fallback);
       applySelection(selection.toJSON());
     },
-    /* Z9 — reconcile using the latest host fingerprint map. After the
+    /* Reconcile using the latest host fingerprint map. After the
      * reconcile, re-apply the snapshot to the DOM. If the selection
-     * collapsed to a single expanded row, run the Z8 auto-grow walk so
+     * collapsed to a single expanded row, run the auto-grow walk so
      * the branch-selection survives the rebuild. */
     reconcileWithFingerprints: function(existingIds, fallback) {
       selection.reconcileWithFingerprints(
@@ -278,7 +277,7 @@ function __installGridController(container, vscode) {
         latestFingerprints,
         fallback == null ? null : fallback,
       );
-      /* Z8 persistence across reconcile — single-id selection on an
+      /* Persistence across reconcile — single-id selection on an
        * expanded row re-grows the branch. */
       var snap = selection.toJSON();
       if (snap.nodeIds.length === 1 && snap.activeCursor
@@ -306,7 +305,7 @@ function __installGridController(container, vscode) {
     },
     selectAllVisible: function(visibleIds) {
       if (!visibleIds || visibleIds.length === 0) return;
-      /* Z10 — pass current cursor as anchorHint so it is preserved when
+      /* Pass current cursor as anchorHint so it is preserved when
        * still present in the new set. */
       var cur = selection.activeCursor;
       selection.selectAll(visibleIds, cur);
@@ -318,7 +317,7 @@ function __installGridController(container, vscode) {
       broadcast();
     },
     getActiveCursor: function() { return selection.activeCursor; },
-    /* B.1.h — column-axis twins of GridMouseController. */
+    /* Column-axis twins of GridMouseController. */
     onColumnClick: function(columnId, orderedColumnIds, mods) {
       if (mods && mods.ctrl) {
         selection.toggleColumn(columnId);
@@ -350,7 +349,7 @@ function __installGridController(container, vscode) {
     getSelectionSnapshot: function() { return selection.toJSON(); },
     isRowExpandedById: isRowExpandedById,
     getVisibleDescendantIds: getVisibleDescendantIds,
-    /* B.1.d — twin of GridMouseController.onToggleIconClick. Mirror only. */
+    /* Twin of GridMouseController.onToggleIconClick. Mirror only. */
     onToggleIconClick: function(parentNodeId, kind, value) {
       vscode.postMessage({
         type: 'toggleStateChanged', parentNodeId: parentNodeId,

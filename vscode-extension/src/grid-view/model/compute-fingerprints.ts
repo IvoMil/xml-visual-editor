@@ -1,5 +1,5 @@
 /**
- * Z9 — per-nodeId content fingerprints for the selection reconcile.
+ * Per-nodeId content fingerprints for the selection reconcile.
  *
  * The host computes fingerprints for every renderable id in the current
  * tree after each rebuild. `GridSelectionModel.reconcileWithFingerprints`
@@ -7,7 +7,7 @@
  * when the id was added to the selection) against the freshly-computed
  * value. Ids whose path still exists but whose content changed are
  * dropped — avoiding the "path-preserved but pointing at a different
- * sibling" failure mode observed in Round-4 manual verification.
+ * sibling" failure mode.
  *
  * Fingerprint format (stable across platforms):
  *   element   → `<localName>|<attrKvDigest>|<textValue>`
@@ -21,12 +21,12 @@
  * `name=value;` — stable, no hashing required (xml attribute namespaces
  * are already normalised by the engine).
  *
- * IMPORTANT (Z9 round-4 re-fix, 2026-04-20): siblingIndex is deliberately
- * OMITTED so the reverse-index remap in `reconcileWithFingerprints` can
- * map `row[4]` (pre-delete) to `row[3]` (post-delete) when the content
- * is the same. If two sibling elements have identical name+attrs+text
- * their fingerprints collide; the remap then collapses them to a single
- * fresh id — a documented, accepted behaviour for B.6 fixtures.
+ * IMPORTANT: siblingIndex is deliberately OMITTED so the reverse-index
+ * remap in `reconcileWithFingerprints` can map `row[4]` (pre-delete) to
+ * `row[3]` (post-delete) when the content is the same. If two sibling
+ * elements have identical name+attrs+text their fingerprints collide;
+ * the remap then collapses them to a single fresh id — a documented,
+ * accepted behaviour.
  */
 import { GridModel } from './grid-model';
 import { GridNode } from './grid-node';

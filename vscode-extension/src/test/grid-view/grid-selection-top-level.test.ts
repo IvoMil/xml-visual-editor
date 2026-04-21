@@ -2,8 +2,7 @@ import { strict as assert } from 'assert';
 import { topLevelSelectedNodeIds } from '../../grid-view/model/grid-selection-top-level';
 
 /**
- * B.1.g — topLevelSelectedNodeIds helper
- * Ref: docs/designs/DESIGN_GRID_ALIGNMENT.md §9.6
+ * topLevelSelectedNodeIds helper
  *
  * The helper drives the table-mode-OFF (⊞) icon gating: only the
  * outermost of each disjoint nested selection group receives an icon.

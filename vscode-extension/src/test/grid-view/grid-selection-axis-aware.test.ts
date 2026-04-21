@@ -11,8 +11,7 @@ import {
 } from '../../grid-view/model/grid-selection-axis';
 
 /**
- * B.1.e — axis-aware selection model + empty-on-open default.
- * Refs: docs/designs/DESIGN_GRID_ALIGNMENT.md §9.0 D0.1, Q7, Q8, Q9.
+ * Axis-aware selection model with empty-on-open default.
  */
 
 suite('GridSelectionModel — first-open empty selection (D0.1)', () => {
@@ -180,7 +179,7 @@ suite('GridSelectionModel — reconcile column entries by parent existence', () 
 
 suite('GridSelectionModel — row selection survives tableMode toggle', () => {
   test('row nodeIds are unchanged across a no-op reconcile (simulates tableMode flip)', () => {
-    // Q8 is a renderer-side property: toggling tableMode does not change
+    // tableMode is a renderer-side property: toggling it does not change
     // the set of RENDERABLE nodeIds (the same tree is emitted either as
     // a table or a tree ladder). The model therefore sees a reconcile
     // with the same existingIds, and the selection must survive

@@ -1,8 +1,8 @@
 /**
  * Pure unit tests for GridSelectionModel.removeIds — the symmetric
- * bulk-remove primitive introduced for the Ctrl+click "toggle subtree"
- * flow (Z12). Split out of grid-selection-model.test.ts to keep that
- * file under the 500-line soft cap.
+ * bulk-remove primitive for the Ctrl+click "toggle subtree" flow.
+ * Split out of grid-selection-model.test.ts to keep that file under
+ * the 500-line soft cap.
  */
 import { strict as assert } from 'assert';
 import { GridSelectionModel } from '../../grid-view/model/grid-selection';

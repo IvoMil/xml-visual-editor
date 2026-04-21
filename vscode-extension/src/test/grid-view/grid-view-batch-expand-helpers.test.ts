@@ -24,7 +24,7 @@ suite('computeIdDelta — renderable-id delta for selection growth', () => {
   });
 
   test('delta preserves DOM order of the "after" list', () => {
-    // Z1/Z2 shape: expanding a parent reveals attributes and children in
+    // Expanding a parent reveals attributes and children in
     // DOM order. The delta MUST keep that order so the growth pass adds
     // ids in the same order the user would see them scrolling.
     const before = ['/root[1]', '/root[1]/nodes[1]'];
@@ -102,7 +102,7 @@ suite('pickInnermostExpanded — innermost-first collapse target', () => {
   });
 
   test('ancestor expanded, descendant NOT in selection → returns deepest expanded descendant across the full DOM subtree', () => {
-    // Z7 refinement: per-branch deepest-expanded walk considers ALL expanded
+    // Per-branch deepest-expanded walk considers ALL expanded
     // rows in the DOM, not only those in the selection. So even though
     // `A/x` is not selected, `-` still collapses it first because it is
     // the deepest expanded descendant of selection root `A`.

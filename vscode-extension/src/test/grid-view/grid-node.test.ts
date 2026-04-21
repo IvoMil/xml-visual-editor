@@ -135,7 +135,7 @@ suite('GridNode', () => {
     assert.strictEqual(node.childCount, 5);
   });
 
-  // ── Bugfix round 3: table-candidate children start collapsed ─────────
+  // ── Table-candidate children start collapsed ──────────────────────────
 
   test('table-candidate parent has collapsed children (expandDepth=0)', () => {
     const data = makeNodeData({

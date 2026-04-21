@@ -16,8 +16,8 @@ struct JsonRpcResponse;
 // Throws std::runtime_error or std::invalid_argument on failure.
 using MethodHandler = std::function<nlohmann::json(const nlohmann::json& params, ServiceContainer& container)>;
 
-// Phase B.4: raw-string handler. Returns a pre-serialised JSON value that will
-// be slotted directly into the JSON-RPC response's "result" field, bypassing
+// Raw-string handler: returns a pre-serialised JSON value that will be
+// slotted directly into the JSON-RPC response's "result" field, bypassing
 // nlohmann::json construction + dump() for large payloads (e.g.
 // gridView.getTreeData on multi-megabyte trees). The returned string MUST be a
 // valid JSON value (object, array, number, string, bool, or null). Throws the

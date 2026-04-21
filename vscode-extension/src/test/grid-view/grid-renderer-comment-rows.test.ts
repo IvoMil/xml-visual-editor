@@ -178,10 +178,9 @@ suite('GridRenderer — comment rows', () => {
        3);
       const html = renderer.render(model);
       // The child row at depth 1 has one indent cell at column 1; it must
-      // carry the data attribute used by the CSS tree-guide rule. Round B.1
-      // switched the CSS mechanism from `box-shadow: inset` to a
-      // `linear-gradient` background (so the guide is continuous across
-      // rows once `row-gap` was removed), but the DOM marker is unchanged.
+      // carry the data attribute used by the CSS tree-guide rule. The CSS
+      // mechanism uses a `linear-gradient` background (continuous across
+      // rows), but the DOM marker is unchanged.
       assert.ok(
         html.includes('class="g-indent" data-ancestor-expanded="1"'),
         'Indent cell of expanded subtree must carry data-ancestor-expanded="1"',

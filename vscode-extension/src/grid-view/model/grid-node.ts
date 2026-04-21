@@ -82,11 +82,11 @@ export class GridNode {
     return this.attributes.length > 0;
   }
 
-  /** True iff the engine flagged this node as either a pure (Issue F,
-   *  scalar-only) OR a hybrid (B.1.a, same-shape) table candidate. The
-   *  renderer uses this to decide whether to dispatch into the table
-   *  rendering path, while internal engine-level checks keep using
-   *  `isTableCandidate` directly to preserve the pure/hybrid distinction. */
+  /** True iff the engine flagged this node as either a pure (scalar-only)
+   *  OR a hybrid (same-shape) table candidate. The renderer uses this
+   *  to decide whether to dispatch into the table rendering path, while
+   *  internal engine-level checks keep using `isTableCandidate` directly
+   *  to preserve the pure/hybrid distinction. */
   get isTableLike(): boolean {
     return this.isTableCandidate || this.isHybridTableCandidate;
   }

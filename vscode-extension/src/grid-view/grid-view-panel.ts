@@ -29,7 +29,7 @@ interface SelectionSnapshot {
   columnActiveCursor?: string | null;
 }
 
-/** Z5a — capture `isExpanded` for every node in the current tree so the
+/** Capture `isExpanded` for every node in the current tree so the
  *  state can be re-applied after `setTreeData` rebuilds the tree from
  *  fresh engine data (tab switch, live edit, etc.). Exported for tests. */
 export function snapshotExpansionState(root: GridNode): Map<string, boolean> {
@@ -42,7 +42,7 @@ export function snapshotExpansionState(root: GridNode): Map<string, boolean> {
   return out;
 }
 
-/** Z5a — re-apply a previously-captured expansion state onto a freshly
+/** Re-apply a previously-captured expansion state onto a freshly
  *  built tree. Nodes that do not appear in the snapshot keep their
  *  default `expandDepth` initial state. Exported for tests. */
 export function applyExpansionState(root: GridNode, snap: Map<string, boolean>): void {
@@ -56,15 +56,15 @@ export function applyExpansionState(root: GridNode, snap: Map<string, boolean>):
 
 export class GridViewPanel implements vscode.CustomTextEditorProvider {
   public static readonly viewType = 'xmlVisualEditor.gridView';
-  /** Z5b — debounce window for live-edit reconcile. Exposed for tests. */
+  /** Debounce window for live-edit reconcile. Exposed for tests. */
   public static readonly LIVE_EDIT_DEBOUNCE_MS = 150;
   private readonly model = new GridModel();
   private readonly renderer = new GridRenderer();
-  /** B.1.d — session-only toggle state (tableMode / flip) per webview.
+  /** Session-only toggle state (tableMode / flip) per webview.
    *  Lost on webview dispose (no persistence). */
   private readonly toggleState = createToggleState();
-  /** Latest selection snapshot reported by the webview (B.6.b). Stored
-   *  for future use by `+`/`-` batching (B.6.e), status bar, etc. */
+  /** Latest selection snapshot reported by the webview. Stored for use
+   *  by `+`/`-` batching, status bar, etc. */
   private lastSelection: SelectionSnapshot = { nodeIds: [], anchor: null, activeCursor: null };
 
   /** Read-only access to the most recent webview-reported selection. */
@@ -92,7 +92,7 @@ export class GridViewPanel implements vscode.CustomTextEditorProvider {
     webviewPanel.webview.options = { enableScripts: true };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
-    // Z5b — Debounce live text-edit reconcile so each keystroke does not
+    // Debounce live text-edit reconcile so each keystroke does not
     // trigger a full engine round-trip. 150ms is enough to feel live
     // while coalescing fast typing bursts. Uses `document.getText()` so
     // the reconcile sees the IN-MEMORY document (not on-disk contents).
@@ -176,7 +176,7 @@ export class GridViewPanel implements vscode.CustomTextEditorProvider {
           break;
         }
         case 'toggleStateChanged': {
-          // B.1.d — session-only toggle-state update from the webview.
+          // Session-only toggle-state update from the webview.
           // Re-render from the existing in-memory GridModel; no engine
           // fetch, no expansion-state rebuild.
           if (msg.parentNodeId && msg.kind && typeof msg.value === 'boolean') {
@@ -220,25 +220,24 @@ export class GridViewPanel implements vscode.CustomTextEditorProvider {
       changeDocSub.dispose();
     });
 
-    // Round 8 Bug P — webview visibility transitions MUST NOT trigger
-    // a full engine refetch + setTreeData rebuild. With
-    // `retainContextWhenHidden: true` (see extension.ts
-    // registerCustomEditorProvider webviewOptions), the webview DOM +
-    // JS state are preserved while the tab is backgrounded, so the
-    // user's expansion, drill-down openings, row/column selection, and
-    // table-mode/flip toggles remain intact in the retained DOM. A
-    // blanket refetch on every visibility flip would overwrite that
-    // DOM with freshly-rendered HTML and — in practice — clobber
-    // expansion state (the original snapshot/restore dance relied on
-    // stable nodeIds across the engine round-trip but empirically
-    // failed often enough that users saw every expansion collapse on
-    // tab switch). Live-edit reconcile is independently handled by the
-    // debounced `onDidChangeTextDocument` listener above, so external
-    // content changes are still picked up. The only defensive case is
-    // a panel that somehow became visible without an initial load
-    // having populated the model — then we do a one-shot catch-up
-    // fetch so the grid isn't left on the "Grid View loading..."
-    // placeholder.
+    // Webview visibility transitions MUST NOT trigger a full engine
+    // refetch + setTreeData rebuild. With `retainContextWhenHidden:
+    // true` (see extension.ts registerCustomEditorProvider
+    // webviewOptions), the webview DOM + JS state are preserved while
+    // the tab is backgrounded, so the user's expansion, drill-down
+    // openings, row/column selection, and table-mode/flip toggles
+    // remain intact in the retained DOM. A blanket refetch on every
+    // visibility flip would overwrite that DOM with freshly-rendered
+    // HTML and — in practice — clobber expansion state (the original
+    // snapshot/restore dance relied on stable nodeIds across the
+    // engine round-trip but empirically failed often enough that users
+    // saw every expansion collapse on tab switch). Live-edit reconcile
+    // is independently handled by the debounced
+    // `onDidChangeTextDocument` listener above, so external content
+    // changes are still picked up. The only defensive case is a panel
+    // that somehow became visible without an initial load having
+    // populated the model — then we do a one-shot catch-up fetch so
+    // the grid isn't left on the "Grid View loading..." placeholder.
     webviewPanel.onDidChangeViewState(() => {
       if (webviewPanel.visible && this.model.getRoot() === null) {
         void this.updateWebview(webviewPanel.webview, document);
@@ -293,8 +292,8 @@ export class GridViewPanel implements vscode.CustomTextEditorProvider {
       });
       const tFetched = Date.now();
       if (treeData) {
-        // Z5a — capture pre-rebuild expansion state (tab switch / live
-        // edit) so user-driven expand/collapse survives a fresh
+        // Capture pre-rebuild expansion state (tab switch / live edit)
+        // so user-driven expand/collapse survives a fresh
         // `setTreeData`. Default-depth semantics still apply to any
         // nodes not present in the previous snapshot.
         const prevRoot = this.model.getRoot();
@@ -330,8 +329,8 @@ export class GridViewPanel implements vscode.CustomTextEditorProvider {
     await this.requestGridData(webview, document.uri.toString(), document.getText());
   }
 
-  /** B.1.d — re-emit HTML from the in-memory `GridModel` without fetching
-   *  from the engine. Triggered by `toggleStateChanged` messages so
+  /** Re-emit HTML from the in-memory `GridModel` without fetching from
+   *  the engine. Triggered by `toggleStateChanged` messages so
    *  table-mode / flip flips feel instant and don't perturb expansion
    *  state or selection. */
   private rerenderFromExistingModel(webview: vscode.Webview): void {
@@ -341,8 +340,8 @@ export class GridViewPanel implements vscode.CustomTextEditorProvider {
     this.postReconcile(webview);
   }
 
-  /** Q4 / Z9: tell the webview to reconcile its selection model against
-   *  the current tree. Called after every re-render (updateTreeData).
+  /** Tell the webview to reconcile its selection model against the
+   *  current tree. Called after every re-render (updateTreeData).
    *  Includes a per-id content fingerprint map so the webview can drop
    *  selections whose path survived but whose content changed. */
   private postReconcile(webview: vscode.Webview): void {

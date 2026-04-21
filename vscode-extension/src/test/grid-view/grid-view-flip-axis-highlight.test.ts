@@ -9,14 +9,12 @@ import {
 import { makeNodeData } from './grid-renderer.test-helpers';
 
 /**
- * B.1.e / Q9 — axis-aware cell highlight at render time.
+ * Axis-aware cell highlight at render time.
  *
  * Verifies that emit-table-region-hybrid (and its unflipped/flipped
  * branches) stamp `.selected` / `.column-selected` on `.t-cell` DOM at
  * emit time, using `selectionAxisForCell` via the
  * `resolveCellAxisClass` helper.
- *
- * Refs: docs/designs/DESIGN_GRID_ALIGNMENT.md §9.0 Q9.
  */
 
 const GROUP_PARENT = '/root[1]/groupA[1]';

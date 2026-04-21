@@ -1,4 +1,4 @@
-// Diagnostic benchmark for Phase B.4 (gridView.getTreeData perf).
+// Diagnostic benchmark for gridView.getTreeData performance.
 // Usage: xve-bench-grid <path-to-xml>
 //
 // Measures, for a single file:
@@ -9,7 +9,7 @@
 // Also prints node count and serialized JSON size.
 //
 // Not a Catch2 test. Linked to xve-core. Added in CMakeLists.txt as xve-bench-grid.
-// Safe to remove after Phase B.4 diagnosis is complete.
+// Diagnostic-only; safe to remove once perf is no longer being tracked.
 
 #include "xmlvisualeditor/core/document.h"
 #include "xmlvisualeditor/services/document_service.h"
@@ -121,8 +121,8 @@ int main(int argc, char** argv) {
         std::string dumped = j.dump();
         auto t_dumped = Clock::now();
 
-        // Phase B.4: new direct-to-string writer (replaces ToJson + dump on the
-        // hot path). Measured separately so we can compare old vs new cost.
+        // Direct-to-string writer (replaces ToJson + dump on the hot path).
+        // Measured separately so we can compare old vs new cost.
         std::string direct_out;
         direct_out.reserve(dumped.size() + 1024);
         xve::WriteGridTreeJson(direct_out, *tree);

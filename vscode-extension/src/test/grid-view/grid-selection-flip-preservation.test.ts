@@ -13,8 +13,6 @@ import { selectionAxisForCell } from '../../grid-view/model/grid-selection-axis'
  * pathway resolves the visual class at emit time via
  * `selectionAxisForCell`. Tests drive the helper directly so the
  * preservation property is independently proven without any DOM.
- *
- * Refs: DESIGN_GRID_ALIGNMENT.md §9.0 Q8, Q9.
  */
 
 const PARENT = '/root[1]/groupA[1]';
@@ -105,7 +103,7 @@ suite('GridSelectionModel — flip-axis preservation', () => {
     sel.toggleColumn(COL_NAME);
     const before = sel.toJSON();
 
-    // tableMode is a pure renderer choice (Q8): toggling it cannot
+    // tableMode is a pure renderer choice: toggling it cannot
     // mutate the selection model. Simulate by re-reading the axis for
     // the same ids across OFF→ON→OFF; the answers must match the
     // unflipped view in both OFF and ON (flipped=false in both).

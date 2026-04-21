@@ -126,7 +126,7 @@ auto SchemaParser::ParseFile(const std::filesystem::path& path) -> std::expected
 // ============================================================================
 
 void SchemaParser::ParseSchema(pugi::xml_node schema_node) {
-    // Phase 0: Process xs:include directives — merge definitions from included schemas.
+    // Stage 1: Process xs:include directives — merge definitions from included schemas.
     if (!base_dir_.empty()) {
         for (auto child : schema_node.children()) {
             std::string_view child_name = child.name();
@@ -172,7 +172,7 @@ void SchemaParser::ParseSchema(pugi::xml_node schema_node) {
         }
     }
 
-    // Phase 1: Index all named types and global elements by name (no processing yet).
+    // Stage 2: Index all named types and global elements by name (no processing yet).
     for (auto child : schema_node.children()) {
         std::string name = child.attribute("name").as_string();
         if (name.empty())
@@ -188,7 +188,7 @@ void SchemaParser::ParseSchema(pugi::xml_node schema_node) {
         }
     }
 
-    // Phase 2: Process all global elements (types are resolved on demand).
+    // Stage 3: Process all global elements (types are resolved on demand).
     for (const auto& name : root_elements_) {
         EnsureElementProcessed(name);
     }

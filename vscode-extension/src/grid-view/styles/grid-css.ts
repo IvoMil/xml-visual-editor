@@ -80,28 +80,28 @@ html, body {
 .g-row.selected > .t-cell.g-editable,
 .g-row.selected > .t-rowid { background-color: var(--grid-selection-bg); color: var(--grid-selection-fg); }
 .g-row.selected > .g-indent { background-color: var(--grid-structural-bg); color: inherit; }
-/* B.6 post-verification fix: comment rows need their own selection rule
-   because the cells are .c-comment-icon / .c-comment-text, not .c-name /
-   .c-value. Reuse the same selection background token so the row is
-   clearly highlighted. Italic styling is preserved by CSS cascade — we
-   only override background and foreground. .g-indent cells on comment
-   rows stay structural (handled by the rule above). */
+/* Comment rows need their own selection rule because the cells are
+   .c-comment-icon / .c-comment-text, not .c-name / .c-value. Reuse the
+   same selection background token so the row is clearly highlighted.
+   Italic styling is preserved by CSS cascade — we only override
+   background and foreground. .g-indent cells on comment rows stay
+   structural (handled by the rule above). */
 .g-row.r-comment.selected > .c-comment-icon,
 .g-row.r-comment.selected > .c-comment-text { background-color: var(--grid-selection-bg); color: var(--grid-selection-fg); }
 .g-row.r-attr > .c-value { opacity: 0.7; }
 .g-row.r-elem > .c-value, .g-row.r-tree > .c-value { opacity: 0.8; }
 .g-row.r-tregion-label > .c-name { font-weight: 600; }
 .g-row.r-text > .c-name { opacity: 0.8; }
-/* Round B.2: XML comment pseudo-rows. Italic + muted colour via the
-   standard VS Code description token; icon cell uses the same token
-   at reduced opacity. Backgrounds deliberately omitted so the 1px
+/* XML comment pseudo-rows. Italic + muted colour via the standard VS
+   Code description token; icon cell uses the same token at reduced
+   opacity. Backgrounds deliberately omitted so the 1px
    column-gap/row-gap grid lines from .grid-root show through. */
 .g-row.r-comment > .c-comment-icon { color: var(--vscode-descriptionForeground); opacity: 0.7; padding: 2px 4px; white-space: nowrap; }
 .g-row.r-comment > .c-comment-text { font-style: italic; color: var(--vscode-descriptionForeground); padding: 2px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* Chevron size unification (Round 8 Bug O): every chevron in the grid
-   — tree rows, element-label rows inside drill-boxes, table-cell
-   chevrons (.cell-toggle), and segment-header toggle arrows — shares
-   the smaller font-size: 10px metric previously only applied to the
+/* Chevron size unification: every chevron in the grid — tree rows,
+   element-label rows inside drill-boxes, table-cell chevrons
+   (.cell-toggle), and segment-header toggle arrows — shares the
+   smaller font-size: 10px metric previously only applied to the
    in-cell .cell-toggle variant. Width/height/margin chosen so the
    14px-wide hit target stays aligned with the depth-guide centreline
    documented above. The .cell-toggle rule below is now a no-op style
@@ -129,7 +129,7 @@ html, body {
 .t-rowid { background-color: var(--grid-header-bg); font-weight: 600; text-align: right; padding-right: 6px; }
 .attr-col-header { color: var(--grid-attribute-icon-color); }
 .elem-col-header { color: var(--grid-element-icon-color); }
-/* B.1.h — column-axis selection highlight. Column-header cells (the
+/* Column-axis selection highlight. Column-header cells (the
    .g-col-header cells inside the .g-col-headers row in unflipped view,
    and the leading label cell of each flipped row) carry a stronger
    .column-selected background matching the row-selection token so the
@@ -191,7 +191,7 @@ html, body {
 .cell-nv-name { opacity: 0.8; }
 .cell-nv-value { opacity: 0.7; }
 .complex-content { opacity: 0.5; font-style: italic; }
-/* B.1.g - inline toggle icons (supersedes the B.1.d .r-toggle-strip row). */
+/* Inline toggle icons. */
 .g-icon { cursor: pointer; user-select: none; display: inline-block; min-width: 1em; text-align: center; line-height: 1; padding: 0 2px; }
 .g-tm-on, .g-tm-off { color: var(--vscode-icon-foreground, currentColor); }
 .g-flip-corner { display: flex; align-items: center; justify-content: center; }

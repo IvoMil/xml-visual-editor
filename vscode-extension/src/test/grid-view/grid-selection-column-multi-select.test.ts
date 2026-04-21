@@ -15,8 +15,6 @@ import {
  * mirroring the row-axis multi-select semantics. Drives the webview-
  * facing controller (`GridMouseController.onColumnClick`) directly so
  * the test is independent of any DOM twin.
- *
- * Refs: DESIGN_GRID_ALIGNMENT.md §9.7.
  */
 
 const PARENT = '/root[1]/groupA[1]';

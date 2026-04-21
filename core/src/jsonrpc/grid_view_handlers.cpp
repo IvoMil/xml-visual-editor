@@ -14,9 +14,9 @@
 namespace xve {
 
 void RegisterGridViewHandlers(JsonRpcServer& server) {
-    // Phase B.4: gridView.getTreeData is served by a raw-string handler so the
-    // engine can emit multi-megabyte tree JSON without constructing an
-    // intermediate nlohmann::json tree. GridViewService writes the JSON body
+    // gridView.getTreeData is served by a raw-string handler so the engine
+    // can emit multi-megabyte tree JSON without constructing an intermediate
+    // nlohmann::json tree. GridViewService writes the JSON body
     // directly into a std::string; the server slots it verbatim into the
     // JSON-RPC envelope's "result" field. Output is byte-identical (same field
     // names, order, numbers, booleans, array ordering) to the previous
@@ -27,7 +27,7 @@ void RegisterGridViewHandlers(JsonRpcServer& server) {
             if (!params.contains("documentId") || !params["documentId"].is_string()) {
                 throw std::invalid_argument("Missing required parameter: documentId");
             }
-            // Phase B.4 diagnostic timing (enabled via XVE_GRID_PROFILE=1).
+            // Optional diagnostic timing (enabled via XVE_GRID_PROFILE=1).
             const char* prof_env = std::getenv("XVE_GRID_PROFILE");
             const bool prof = prof_env && *prof_env && *prof_env != '0';
             auto t0 = std::chrono::steady_clock::now();

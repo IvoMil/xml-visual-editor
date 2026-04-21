@@ -5,8 +5,7 @@ import { createToggleState } from '../../grid-view/model/toggle-state';
 import { makeNodeData } from './grid-renderer.test-helpers';
 
 /**
- * B.1.d — flipped (transposed) table rendering.
- * Refs: docs/designs/DESIGN_GRID_ALIGNMENT.md §9.0 Q4, Q5.
+ * Flipped (transposed) table rendering.
  */
 
 suite('emit-table-region — flipped (transposed) table rendering', () => {

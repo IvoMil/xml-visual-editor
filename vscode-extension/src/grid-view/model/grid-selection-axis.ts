@@ -1,6 +1,5 @@
 /**
- * B.1.e / Q9 — axis-aware selection class resolution for a single
- * table-region cell.
+ * Axis-aware selection class resolution for a single table-region cell.
  *
  * The selection model keeps entries with their original `kind` (`row` or
  * `column`) across a flip toggle — only the RENDERER's choice of visual
@@ -21,8 +20,6 @@
  * The helper is pure: callers pass row/col ids and the current flip
  * state, plus membership predicates. Returns the CSS class the cell
  * should carry (or `'none'`).
- *
- * Refs: docs/designs/DESIGN_GRID_ALIGNMENT.md §9.0 Q9 (locked = A).
  */
 export type AxisClass = 'selected' | 'column-selected' | 'none';
 

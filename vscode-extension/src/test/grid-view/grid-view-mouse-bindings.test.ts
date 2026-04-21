@@ -19,7 +19,7 @@ interface FakeRow {
 class FakeView implements GridView {
   rows: FakeRow[] = [];
   messages: unknown[] = [];
-  // Z8 / Z12 / Z13 — per-node descendant lists the fake walk returns.
+  // Per-node descendant lists the fake walk returns.
   // Tests set this up to simulate the DOM-based descendant walk from
   // the webview-js twin (ordinary expanded headers, synthesized
   // `#group` headers, etc.). Nodes without an entry yield [] (i.e.
@@ -178,7 +178,7 @@ suite('GridMouseController — mouse bindings', () => {
     assert.deepEqual(view.selectedIds().sort(), ['R1', 'R2', 'R3', 'R4']);
   });
 
-  test('plain click on comment row selects it (B.6 post-verification)', () => {
+  test('plain click on comment row selects it', () => {
     view.setRows([
       { id: 'R1' },
       { id: 'R2', isComment: true, nodeType: 'comment' },
@@ -260,7 +260,7 @@ suite('GridMouseController — Ctrl+click auto-grows expanded header and plain c
     controller = new GridMouseController(view, host);
   });
 
-  // ---- Z12 — Ctrl+click on expanded header auto-grows selection ----
+  // ---- Ctrl+click on expanded header auto-grows selection ----
 
   test('Ctrl+click on expanded header auto-adds visible descendants to the selection', () => {
     view.setRows(makeRows(['X', 'A', 'A/c1', 'A/c2']));
@@ -310,7 +310,7 @@ suite('GridMouseController — Ctrl+click auto-grows expanded header and plain c
     assert.equal(view.cursorId(), 'leaf');
   });
 
-  // ---- Z13 — plain click on synthesized `#group` header auto-grows ----
+  // ---- plain click on synthesized `#group` header auto-grows ----
 
   test('plain click on #group header auto-selects all visible .r-trow table row ids', () => {
     // Simulate: groupA contains <item>, which opens a nested table. The

@@ -228,7 +228,7 @@ suite('GridSelectionModel', () => {
     assert.strictEqual(snap.activeCursor, '/b');
   });
 
-  // ---- addIds (B.6 second-round Issue X — selection growth) ----
+  // ---- addIds: selection growth ----
 
   test('addIds merges into a non-empty selection without changing anchor or cursor', () => {
     const sel = new GridSelectionModel('/a');

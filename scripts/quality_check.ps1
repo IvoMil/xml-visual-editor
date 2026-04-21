@@ -46,6 +46,11 @@ if (Test-Path "vscode-extension/node_modules") {
     Write-Host "`n--- TypeScript Checks: SKIPPED (no node_modules) ---" -ForegroundColor DarkYellow
 }
 
+# Annotation gate (process-historical tokens — see coding-standards SKILL §Annotation Style)
+Write-Host "`n--- Annotation Gate ---" -ForegroundColor Yellow
+& "$PSScriptRoot/check-annotations.ps1"
+if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
+
 Write-Host "`n=== Quality Checks Complete ===" -ForegroundColor Cyan
 if ($exitCode -eq 0) {
     Write-Host "All checks PASSED" -ForegroundColor Green

@@ -6,7 +6,7 @@ import { createToggleState } from '../../grid-view/model/toggle-state';
 import { makeNodeData } from './grid-renderer.test-helpers';
 
 /**
- * Inline toggle-icon placement (DESIGN_GRID_ALIGNMENT.md §9.6 / Round 6).
+ * Inline toggle-icon placement.
  *
  * Invariants tested:
  *  - ⊟ (g-tm-on) lives in the leftmost gutter of the column-headers row
@@ -308,7 +308,7 @@ suite('GridRenderer — inline toggle icons placed in chevron-bearing hybrid tab
     ts.setTableMode('/root[1]/groupA[1]', false);
     const html = renderer.render(buildGroupAModel());
     // groupA sits at depth 1, its run members (item) are emitted at
-    // childDepth = 2. Per §9.6 (2026-04-21 correction) the ⊞ gutter
+    // childDepth = 2. The ⊞ gutter
     // sits at grid-column: childDepth+1 / childDepth+2 = 3 / 4 — the
     // SAME column the ⊟ icon would occupy in tableMode:ON — NOT at
     // the ancestor-indent column 2 / 3.
@@ -444,7 +444,7 @@ suite('GridRenderer — inline toggle icons placed in chevron-bearing hybrid tab
   test('legacy .r-toggle-strip row is no longer emitted anywhere', () => {
     const renderer = new GridRenderer();
     const html = renderer.render(buildGroupAModel());
-    assert.ok(!html.includes('r-toggle-strip'), 'B.1.d strip row has been retired');
+    assert.ok(!html.includes('r-toggle-strip'), 'r-toggle-strip row must not be emitted');
   });
 
   test('flipped tableMode:ON still carries both inline icons in the header row', () => {

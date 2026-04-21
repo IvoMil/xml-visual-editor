@@ -17,7 +17,7 @@
 
 namespace xve {
 
-// --- Phase B.4 diagnostic instrumentation (temporary) ---------------------
+// --- Optional diagnostic instrumentation (enabled via XVE_GRID_PROFILE=1) -
 // Set env var XVE_GRID_PROFILE=1 to enable per-call timing output on stderr.
 namespace {
 bool ProfilingEnabled() {
@@ -133,9 +133,9 @@ auto AssignRunIfTable(std::vector<GridTreeNode>& out_children, std::size_t start
     return cls;
 }
 
-// Phase B.4: BuildNode no longer calls Element::GetPath() (O(N^2) across the
-// tree). Instead, the caller passes the already-resolved node_id for this
-// element. Inside, we do a single O(N) pass over children to count element
+// BuildNode avoids Element::GetPath() (was O(N^2) across the tree). Instead,
+// the caller passes the already-resolved node_id for this element. Inside,
+// we do a single O(N) pass over children to count element
 // name frequencies, then a second pass to build each child's node_id from the
 // parent's node_id + name + 1-based index (only when that name has >1
 // occurrence, matching Element::GetPath() semantics). The overall cost drops
@@ -241,7 +241,7 @@ auto BuildNode(pugi::xml_node pugi_node, std::string node_id) -> GridTreeNode {
     return node;
 }
 
-// --- Phase B.4: direct-to-string JSON writer ------------------------------
+// --- Direct-to-string JSON writer ----------------------------------------
 // Avoids constructing intermediate nlohmann::json objects. Emits exactly the
 // same shape and field order as GridTreeNodeToJson in grid_view_handlers.cpp.
 void AppendEscapedJsonString(std::string& out, std::string_view s) {

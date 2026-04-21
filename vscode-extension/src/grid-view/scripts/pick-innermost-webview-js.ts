@@ -1,5 +1,5 @@
 /**
- * Z3 / Z7 / Z14 — DOM walker inline JS for pickInnermostExpandedFromDom.
+ * DOM walker inline JS for pickInnermostExpandedFromDom.
  *
  * Kept as a separate module so the main webview script stays under the
  * 500-line ceiling. The algorithm mirrors `pickInnermostExpanded` in
@@ -8,7 +8,7 @@
  * webview). Canonical tests live in
  * `grid-view-batch-expand-helpers.test.ts`.
  *
- * Z14: subtree walk for synthesized `#group` roots extends across
+ * Subtree walk for synthesized `#group` roots extends across
  * same-depth `.r-trow` data rows. Expanded `.expand-toggle.cell-toggle`
  * chevrons inside those r-trow rows contribute candidates at
  * logicalDepth = rootDepth + 1 (e.g. element-in-one-cell `meta`).

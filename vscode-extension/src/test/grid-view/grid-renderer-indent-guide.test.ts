@@ -49,7 +49,7 @@ function makeDeepTree(): GridTreeNodeData {
   });
 }
 
-suite('GridRenderer — indent guide bar (B.5)', () => {
+suite('GridRenderer — indent guide bar', () => {
   // ── 1. Renderer emits indent cells with ancestor-expanded marker ─────
 
   test('emits data-ancestor-expanded="1" on indent cells for nested rows', () => {

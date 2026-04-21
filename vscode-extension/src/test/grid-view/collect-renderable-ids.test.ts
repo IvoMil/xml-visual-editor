@@ -4,11 +4,10 @@ import { collectRenderableIds } from '../../grid-view/model/collect-renderable-i
 import { makeNodeData } from './grid-renderer.test-helpers';
 
 /**
- * Regression tests for B.6 post-verification Bug 1: table-region
- * `#group` header rows lost their `.selected` class after a re-render
- * triggered by batch `+` / `-`. Root cause: the host-driven reconcile
- * used a tree walk that did not know about synthesized `#group` ids,
- * so they were filtered out of `existingIds`.
+ * Regression tests for `collectRenderableIds`: synthesized `#group`
+ * header ids must be included so the host reconcile preserves selection
+ * highlight after batch expand/collapse. Without them the reconcile's
+ * tree walk filters out `#group` ids from `existingIds`.
  *
  * `collectRenderableIds` mirrors the renderer's table-run grouping rule
  * and must include a `#group` id for every contiguous multi-element

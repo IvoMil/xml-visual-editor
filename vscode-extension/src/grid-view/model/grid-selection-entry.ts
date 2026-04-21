@@ -1,12 +1,12 @@
 /**
- * B.1.e — Axis-aware selection entry types.
+ * Axis-aware selection entry types.
  *
  * A selection entry is either a ROW (an actual nodeId emitted by the
  * engine for an element/attribute/comment) or a COLUMN (a synthetic id
  * representing one attribute or scalar-element column of a hybrid/scalar
  * table region).
  *
- * Column-id synthesis (Q7 = A, DESIGN_GRID_ALIGNMENT.md §9.0):
+ * Column-id synthesis:
  *
  *   ${parentNodeId}#col/@${attrName}   — attribute column
  *   ${parentNodeId}#col/${childName}   — element column (scalar or chevron)

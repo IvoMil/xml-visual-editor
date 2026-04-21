@@ -89,8 +89,7 @@ function walkForCols(
       let dataCols = attrNames.size + elemNames.size;
       // Synthesized "(value)" column for text-only repeated leaves.
       if (dataCols === 0 && hasText) dataCols = 1;
-      // When flipped (B.1.d / Q4=C), the table has one column per
-      // ORIGINAL row (N = seg.nodes.length) instead of per original
+      // When flipped, the table has one column per ORIGINAL row (N = seg.nodes.length) instead of per original
       // col. Grid-column accounting uses whichever is larger.
       const effectiveDataCols = flipped ? seg.nodes.length : dataCols;
       acc.maxCols = Math.max(acc.maxCols, depth + 3 + effectiveDataCols);

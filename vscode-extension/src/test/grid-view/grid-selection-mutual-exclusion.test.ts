@@ -6,12 +6,11 @@ import {
 } from '../../grid-view/model/grid-selection-entry';
 
 /**
- * Invariant I3 (DESIGN_GRID_ALIGNMENT.md §9.7) — row-axis and
- * column-axis selections are MUTUALLY EXCLUSIVE. Every row-adding
- * mutator must clear column state first, every column-adding mutator
- * must clear row state first. These tests drive every public mutator
- * in a matrix and assert nodeIds.length and columnIds.length are never
- * both > 0 at any point.
+ * Row-axis and column-axis selections are MUTUALLY EXCLUSIVE: every
+ * row-adding mutator must clear column state first, every column-adding
+ * mutator must clear row state first. These tests drive every public
+ * mutator in a matrix and assert nodeIds.length and columnIds.length
+ * are never both > 0 at any point.
  */
 
 const PARENT = '/root[1]/groupA[1]';

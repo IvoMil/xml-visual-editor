@@ -63,9 +63,9 @@ class IGridViewService {
 public:
     virtual ~IGridViewService() = default;
     virtual auto GetTreeData(const std::string& doc_id) -> std::optional<GridTreeNode> = 0;
-    // Phase B.4: direct-to-string serialisation. Returns the pre-serialised
-    // JSON body (the "result" field content for gridView.getTreeData). Shape
-    // is byte-identical to GridTreeNodeToJson(*GetTreeData(doc_id)).dump().
+    // Direct-to-string serialisation. Returns the pre-serialised JSON body
+    // (the "result" field content for gridView.getTreeData). Shape is
+    // byte-identical to GridTreeNodeToJson(*GetTreeData(doc_id)).dump().
     virtual auto GetTreeDataJson(const std::string& doc_id) -> std::optional<std::string> = 0;
 };
 

@@ -1,25 +1,24 @@
 /**
- * B.1.g — inline toggle-icon emitters. Supersedes the dedicated
- * `.r-toggle-strip` row from B.1.d (see DESIGN_GRID_ALIGNMENT.md §9.6).
+ * Inline toggle-icon emitters.
  *
  * Three glyphs, each returning a small HTML fragment:
  *   - ⊟ (U+229F) table-mode-ON — dropped into the leftmost gutter of
  *     the column-headers row of every `tableMode: ON` table.
  *   - ⊞ (U+229E) table-mode-OFF — dropped into the leftmost gutter of
  *     the TOP ELEMENT ROW of a table-candidate run currently rendered
- *     as a tree ladder. Always visible on every such run (Round 6 /
- *     §9.6 — selection no longer gates this icon).
+ *     as a tree ladder. Always visible on every such run; selection
+ *     does not gate this icon.
  *   - ⇆ (U+21C6) flip — dropped into the top-left corner cell
  *     (`grid-column: depth+2`, above the row-index column) of every
  *     `tableMode: ON` table.
  *
- * Every span carries BOTH the new class / data attributes from §9.6
+ * Every span carries BOTH the current class / data attributes
  * (`g-icon`, `g-tm-on` / `g-tm-off` / `g-flip`, `data-toggle-target` /
  * `data-flip-target`) AND the legacy attributes used by the existing
  * webview click delegation (`toggle-icon` class, `data-parent-node-id`,
  * `data-action`, `data-state`). Keeping the legacy attributes avoids
- * touching the mouse-bindings twin this round — the `.toggle-icon`
- * selector in `grid-view-webview-script.ts` continues to match.
+ * touching the mouse-bindings twin — the `.toggle-icon` selector in
+ * `grid-view-webview-script.ts` continues to match.
  */
 
 function escapeAttr(text: string): string {
@@ -59,7 +58,7 @@ export function emitTableModeOnIcon(nodeId: string): string {
 }
 
 /** ⊞ — table-mode OFF. Always emitted on every table-candidate run
- *  currently rendered as a tree ladder (Round 6 / §9.6). */
+ *  currently rendered as a tree ladder. */
 export function emitTableModeOffIcon(nodeId: string): string {
   const label = 'Table-mode OFF (click to show as table)';
   return (

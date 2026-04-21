@@ -8,14 +8,13 @@ import { GridRenderer } from '../../grid-view/view/grid-renderer';
 import { GridTreeNodeData } from '../../grid-view/grid-view-types';
 
 /**
- * Z14 (round-4 re-fix, 2026-04-20) — real-DOM-shaped test for
- * `pickInnermostExpanded`. Uses the actual GridRenderer output and
- * parses it with a regex mirror of the webview's
+ * Real-DOM-shaped test for `pickInnermostExpanded`. Uses the actual
+ * GridRenderer output and parses it with a regex mirror of the webview's
  * `__buildOrderedRowDepthIndex` / `__isRowElExpanded` / `__collectCellChevronsJS`
  * functions so the algorithm is exercised against the ACTUAL DOM shape
  * instead of hand-crafted fixtures.
  *
- * The previously-shipped Z14 unit tests used hand-crafted fixtures that
+ * The previously-shipped unit tests used hand-crafted fixtures that
  * matched the renderer's INTENDED output but not the USER-observed
  * DOM. These tests close the loop: if the renderer changes its output
  * shape, this suite catches the regression in the picker.
@@ -148,7 +147,7 @@ function buildUserReproModel(options: {
   const model = new GridModel();
   model.setTreeData(root, 3);
   // Test explicitly opts into the legacy `expandDepth = 3` path so root
-  // + groupA start expanded, preserving the Z14-class real-DOM scenario
+  // + groupA start expanded, preserving the real-DOM scenario
   // this fixture exercises. (Production `setTreeData` uses the D0
   // collapsed-by-default path — GridNode default `expandDepth = 0`.)
   // Items are table-candidate children so they start collapsed; the
@@ -191,7 +190,7 @@ suite('pickInnermostExpanded — verified against real GridRenderer DOM output t
     assert.deepEqual(
       picked,
       ['/root[1]/groupA[1]/item[2]/meta[1]'],
-      `Z14 picker must return the cell-expanded meta. Got: ${JSON.stringify(picked)}. ` +
+      `picker must return the cell-expanded meta. Got: ${JSON.stringify(picked)}. ` +
         `DOM rows: ${JSON.stringify(
           rows.map((r) => ({ id: r.id, depth: r.depth, exp: r.isExpanded, tr: r.isTableRow })),
         )}`,

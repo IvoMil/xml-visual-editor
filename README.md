@@ -105,7 +105,8 @@ See [Project Plan](docs/PROJECT_PLAN.md) for the full roadmap (Phases 1–7).
 | 5b.1 | Grid View Scaffold | ✅ Complete |
 | 5b.2 | Grid View Table Mode | ✅ Complete |
 | 5b.3 | Grid View Expand/Collapse, Navigation, Hybrid Tables & Drill-Down | ✅ Complete |
-| 5b.4 | Grid View Bidirectional Sync & Inline Editing | 📋 Next |
+| 5b.3c | Annotation Cleanup & Standards Codification | 📋 Next |
+| 5b.4 | Grid View Bidirectional Sync & Inline Editing | 📋 Backlog |
 | 5 | Future Enhancements | 📋 Backlog |
 | 6 | Notepad++ Plugin | 📋 Backlog |
 | 7 | CLI Tools & Polish | 📋 Backlog |

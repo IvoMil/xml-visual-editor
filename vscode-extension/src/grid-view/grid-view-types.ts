@@ -74,15 +74,15 @@ export interface NodeSelectedMessage {
   nodeType: string;
 }
 
-/** Webview → host: batch expand/collapse for multi-row selection (B.6.e).
+/** Webview → host: batch expand/collapse for multi-row selection.
  *
  * `direction === '+'` expands every collapsed expandable id in the list.
  * `direction === '-'` collapses every expanded id in the list.
  * All other ids (leaves, comments, wrong-direction) are silently skipped
- * per locked decision Q5 (direction-guarded). Per Q6, the webview sends
- * every id in the selection regardless of DOM visibility; the host
- * filters using engine-owned `GridNode.isExpanded` state so that hidden
- * descendants of collapsed ancestors still flip.
+ * (direction-guarded). The webview sends every id in the selection
+ * regardless of DOM visibility; the host filters using engine-owned
+ * `GridNode.isExpanded` state so that hidden descendants of collapsed
+ * ancestors still flip.
  */
 export interface BatchToggleExpandMessage {
   type: 'batchToggleExpand';
@@ -90,7 +90,7 @@ export interface BatchToggleExpandMessage {
   nodeIds: string[];
 }
 
-/** Webview → host: B.1.d session-only toggle state change for a parent
+/** Webview → host: session-only toggle state change for a parent
  *  element. Host updates its ToggleState and re-renders from the
  *  existing in-memory GridModel (no engine fetch). */
 export interface ToggleStateChangedMessage {

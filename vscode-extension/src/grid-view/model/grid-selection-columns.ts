@@ -1,19 +1,17 @@
 /**
- * B.1.h — column-axis selection state (Shift/Ctrl multi-select).
+ * Column-axis selection state (Shift/Ctrl multi-select).
  *
  * Mirrors the row-axis state owned by `GridSelectionModel` but for
  * synthetic column ids (`${parent}#col/...`). Kept in its own module so
  * the main selection file stays comfortably under the 500-line ceiling.
  *
  * Invariants (asserted by the owning model):
- *   C1. `size === 0` iff `anchor === null` iff `activeCursor === null`.
- *   C2. When non-empty: `anchor ∈ columns` and `activeCursor ∈ columns`.
+ *   - `size === 0` iff `anchor === null` iff `activeCursor === null`.
+ *   - When non-empty: `anchor ∈ columns` and `activeCursor ∈ columns`.
  *
- * The model enforces mutual exclusion with the row axis (Invariant I3 in
- * the parent file): no public mutator here touches row state — the model
- * clears the opposite axis before dispatching into these methods.
- *
- * Refs: docs/designs/DESIGN_GRID_ALIGNMENT.md §9.7.
+ * The model enforces mutual exclusion with the row axis: no public
+ * mutator here touches row state — the model clears the opposite axis
+ * before dispatching into these methods.
  */
 
 export class ColumnSelection {
@@ -55,7 +53,7 @@ export class ColumnSelection {
     this._cursor = columnId;
   }
 
-  /** Idempotent remove. Falls the cursor/anchor back per C1/C2. */
+  /** Idempotent remove. Falls the cursor/anchor back per the invariants above. */
   remove(columnId: string): void {
     if (!this._columns.delete(columnId)) return;
     if (this._columns.size === 0) {
@@ -152,7 +150,7 @@ export class ColumnSelection {
     }
   }
 
-  /** Debug / assertion helper — verifies C1/C2 hold. Throws on violation. */
+  /** Debug / assertion helper — verifies invariants hold. Throws on violation. */
   assertInvariants(): void {
     const empty = this._columns.size === 0;
     if (empty) {

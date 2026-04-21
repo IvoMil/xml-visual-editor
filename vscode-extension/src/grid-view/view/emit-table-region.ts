@@ -40,11 +40,11 @@ function indentCells(depth: number): string {
   return html;
 }
 
-/** B.1.g — indent cells for the column-headers row of a tableMode:ON
+/** Indent cells for the column-headers row of a tableMode:ON
  *  table. Emits `depth` plain indent cells followed by a gutter cell at
  *  `grid-column: depth+1 / depth+2` carrying the table-mode-ON icon.
- *  DESIGN_GRID_ALIGNMENT.md §9.6: leftmost gutter of the column-headers
- *  row holds the ⊟ icon, always visible regardless of selection. */
+ *  Leftmost gutter of the column-headers row holds the ⊡ icon,
+ *  always visible regardless of selection. */
 function headerIndentCellsWithModeIcon(depth: number, parentNodeId: string): string {
   let html = indentCells(depth);
   const iconCol = `${depth + 1} / ${depth + 2}`;
@@ -54,10 +54,10 @@ function headerIndentCellsWithModeIcon(depth: number, parentNodeId: string): str
   return html;
 }
 
-/** B.1.g — the "top-left corner" cell of a tableMode:ON table. Shares the
+/** The "top-left corner" cell of a tableMode:ON table. Shares the
  *  row-index column (`grid-column: depth+2 / depth+3`) in the header row
  *  only; replaces the plain "#" label with the flip (⇆) icon so flip
- *  clicks land outside every column-header click surface (§9.6 rule 6). */
+ *  clicks land outside every column-header click surface. */
 function flipCornerCell(
   rowidCol: string,
   parentNodeId: string,
@@ -100,12 +100,12 @@ function renderExpandableCell(child: GridNode): string {
 /** Emit a table region — rows participate directly in the root grid at
  *  depth = parent depth + 1.
  *
- *  Column discovery deliberately SKIPS comment children (Round B.1
- *  regression fix): a comment inside a row would otherwise synthesise an
- *  empty-name data column and its text would leak into that column.
- *  Instead, each row's comment children are emitted as standalone
- *  r-comment rows (via emitCommentRow, spanning grid-column `(D+2)/-1`)
- *  immediately BEFORE the owning data row. */
+ *  Column discovery deliberately SKIPS comment children: a comment
+ *  inside a row would otherwise synthesise an empty-name data column
+ *  and its text would leak into that column. Instead, each row's
+ *  comment children are emitted as standalone r-comment rows (via
+ *  emitCommentRow, spanning grid-column `(D+2)/-1`) immediately BEFORE
+ *  the owning data row. */
 export function emitTableRegion(
   nodes: GridNode[],
   depth: number,
@@ -120,10 +120,10 @@ export function emitTableRegion(
 ): void {
   if (nodes.length === 0) return;
 
-  // B.1.c dispatch: if the engine flags this run as a hybrid candidate
+  // Dispatch: if the engine flags this run as a hybrid candidate
   // (same-shape repeated siblings with non-scalar element children), route
   // to the hybrid emitter. Otherwise the legacy scalar-only path below
-  // runs byte-identically to pre-B.1.c to preserve regression coverage
+  // preserves regression coverage against the legacy scalar-only emitter
   // (groupB pure tables, attribute-only cells via legacy cell-nv path).
   if (renderDrillBox && isHybridRun(nodes)) {
     emitTableRegionHybrid(
@@ -231,8 +231,8 @@ export function emitTableRegion(
     for (const child of node.children) {
       if (child.type === 'comment') emitCommentRow(child, depth, rows);
     }
-    // B.1.e / Q9 — row-wrapper selection class. In unflipped scalar mode
-    // a row-kind entry maps to the visual row; column-kind entries do
+    // Row-wrapper selection class. In unflipped scalar mode a
+    // row-kind entry maps to the visual row; column-kind entries do
     // NOT highlight the wrapper (they highlight individual cells instead).
     const rowSelected = !!selection?.has(node.nodeId);
     const wrapperSelClass = rowSelected ? ' selected' : '';
@@ -303,9 +303,9 @@ export function emitTableRegion(
   }
 }
 
-/** B.1.d — flipped (transposed) scalar-only table: one row per original
- *  column (attr / elem / synthesised "(value)"); one data column per
- *  original row. No chevron cells here (hybrid is handled elsewhere). */
+/** Flipped (transposed) scalar-only table: one row per original column
+ *  (attr / elem / synthesised "(value)"); one data column per original
+ *  row. No chevron cells here (hybrid is handled elsewhere). */
 function emitScalarFlipped(
   nodes: readonly GridNode[],
   attrCols: readonly string[],
@@ -341,11 +341,11 @@ function emitScalarFlipped(
   }
   rows.push('</div>');
 
-  // B.1.e / Q9 — flipped view: axis is swapped literally. The visual
-  // "row" corresponds to an ORIGINAL column (attr / elem / value);
-  // each data cell corresponds to ONE original row. So column-selected
-  // entries now highlight the visual-row wrapper, and row-selected
-  // entries highlight the individual data cells within each visual row.
+  // Flipped view: axis is swapped literally. The visual "row" corresponds
+  // to an ORIGINAL column (attr / elem / value); each data cell
+  // corresponds to ONE original row. So column-selected entries now
+  // highlight the visual-row wrapper, and row-selected entries highlight
+  // the individual data cells within each visual row.
   const emitDataRow = (
     label: string,
     colKind: 'attr' | 'elem',
@@ -384,7 +384,7 @@ function emitScalarFlipped(
         ` style="--depth: ${depth}">`,
     );
     rows.push(tableIndent);
-    // B.1.h — the first t-th cell of a flipped row IS the column header
+    // The first t-th cell of a flipped row IS the column header
     // (visually the row label, semantically the original column). Carry
     // data-column-id + .g-col-header so click dispatch treats it as a
     // column target. Only attr / elem columns synthesise an id; the

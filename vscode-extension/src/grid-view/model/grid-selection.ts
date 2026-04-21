@@ -6,21 +6,20 @@
  * `grid-selection-columns.ts`). Zero DOM / VS Code dependencies.
  *
  * Invariants (asserted by `assertInvariants()` + every mutator guards):
- *   I1. Row: `size === 0` iff `anchor === null` iff `activeCursor === null`.
- *   I2. Row: when non-empty, `anchor ∈ nodeIds` and `activeCursor ∈ nodeIds`.
- *   I3. Mutual exclusion: `nodeIds.size > 0 && columnSize > 0` is impossible.
- *   I4. Column: `columnSize > 0` implies column anchor + cursor are both
- *       members of `columnIds`. Row C1/C2 mirror in `ColumnSelection`.
+ *   - Row: `size === 0` iff `anchor === null` iff `activeCursor === null`.
+ *   - Row: when non-empty, `anchor ∈ nodeIds` and `activeCursor ∈ nodeIds`.
+ *   - Mutual exclusion: `nodeIds.size > 0 && columnSize > 0` is impossible.
+ *   - Column: `columnSize > 0` implies column anchor + cursor are both
+ *     members of `columnIds`. Row invariants mirror in `ColumnSelection`.
  *
- * D0.1: first reconcile after construction / `clear()` leaves an empty
- * selection EMPTY (legacy Z5c fallback only applies on SUBSEQUENT
- * reconciles — recovery mechanism, not initialiser). Tracked via
+ * First reconcile after construction / `clear()` leaves an empty
+ * selection EMPTY (fallback only applies on SUBSEQUENT reconciles —
+ * recovery mechanism, not initialiser). Tracked via
  * `_initialReconcileDone`.
  *
- * Q7/Q8/Q9 (DESIGN_GRID_ALIGNMENT §9.0): axis-aware entries; selection
- * survives tableMode toggle; axis swap on flip is renderer-side only.
- * Q1/Q3/Q4 (DESIGN_GRID_MULTI_SELECT §0): selectAll / collapseToCursor /
- * reconcile. B.1.h (§9.7): column Shift/Ctrl multi-select + I3/I4.
+ * Axis-aware entries; selection survives tableMode toggle; axis swap on
+ * flip is renderer-side only. selectAll / collapseToCursor / reconcile.
+ * Column Shift/Ctrl multi-select with row/column mutual exclusion.
  */
 import {
   FingerprintReconcileState,
@@ -32,11 +31,11 @@ export interface GridSelectionSnapshot {
   nodeIds: string[];
   anchor: string | null;
   activeCursor: string | null;
-  /** B.1.e / B.1.h — synthetic column ids currently selected (Q7 = A). */
+  /** Synthetic column ids currently selected. */
   columnIds: string[];
-  /** B.1.h — origin of column-axis range extensions (Shift+Click). */
+  /** Origin of column-axis range extensions (Shift+Click). */
   columnAnchor: string | null;
-  /** B.1.h — column-axis focus ring target. */
+  /** Column-axis focus ring target. */
   columnActiveCursor: string | null;
 }
 
@@ -44,16 +43,16 @@ export class GridSelectionModel {
   private _nodeIds: Set<string> = new Set();
   private _anchor: string | null = null;
   private _activeCursor: string | null = null;
-  /** Z9 — per-id content fingerprints captured at selection-mutation
-   *  time. `captureFingerprints` preserves existing values so the
+  /** Per-id content fingerprints captured at selection-mutation time.
+   *  `captureFingerprints` preserves existing values so the
    *  "captured at add time" semantic survives later fresh maps. */
   private _fingerprints: Map<string, string> = new Map();
-  /** B.1.e / Q7 / B.1.h — axis-aware column selection state.
-   *  Row and column axes are MUTUALLY EXCLUSIVE by Invariant I3: any
-   *  mutator that would add to one axis first clears the other. */
+  /** Axis-aware column selection state. Row and column axes are
+   *  MUTUALLY EXCLUSIVE: any mutator that would add to one axis first
+   *  clears the other. */
   private _columnSel: ColumnSelection = new ColumnSelection();
-  /** B.1.e / D0.1 — true once the model has observed its first reconcile
-   *  OR any mutator call. While false, a reconcile that would leave the
+  /** True once the model has observed its first reconcile OR any
+   *  mutator call. While false, a reconcile that would leave the
    *  selection empty does NOT fall back to the caller's
    *  `fallbackFirstVisibleId` (freshly-opened document has no highlight
    *  until the user clicks). `clear()` resets this to false so a later
@@ -97,7 +96,7 @@ export class GridSelectionModel {
 
   /** Ctrl+Click: toggle membership of `nodeId`. Empty-set add sets
    *  anchor+cursor; non-empty add advances cursor. Remove-last clears
-   *  to I1 empty; remove-of-cursor/anchor falls back to any surviving id. */
+   *  to empty; remove-of-cursor/anchor falls back to any surviving id. */
   toggle(nodeId: string): void {
     if (this._nodeIds.has(nodeId)) {
       this._nodeIds.delete(nodeId);
@@ -115,7 +114,7 @@ export class GridSelectionModel {
       this._initialReconcileDone = true;
       return;
     }
-    // Mutual exclusion (I3): adding a row while columns are present must
+    // Mutual exclusion: adding a row while columns are present must
     // first clear the column axis.
     this._columnSel.clear();
     this._nodeIds.add(nodeId);
@@ -128,7 +127,7 @@ export class GridSelectionModel {
 
   /** Shift+Click/Shift+Arrow: replace set with inclusive slice of
    *  `orderedVisibleIds` between anchor (or `nodeId` if anchor absent)
-   *  and `nodeId`. Q2: comments participate when caller includes them. */
+   *  and `nodeId`. Comments participate when caller includes them. */
   extendRangeTo(nodeId: string, orderedVisibleIds: readonly string[]): void {
     this._columnSel.clear();
     const targetIdx = orderedVisibleIds.indexOf(nodeId);
@@ -148,8 +147,8 @@ export class GridSelectionModel {
     this._initialReconcileDone = true;
   }
 
-  /** Issue X — merge ids without touching anchor/cursor (batch expand
-   *  growth). Establishes anchor+cursor only when previously empty. */
+  /** Merge ids without touching anchor/cursor (batch expand growth).
+   *  Establishes anchor+cursor only when previously empty. */
   addIds(ids: readonly string[]): void {
     if (ids.length === 0) {
       return;
@@ -166,8 +165,8 @@ export class GridSelectionModel {
     this._initialReconcileDone = true;
   }
 
-  /** Z12 — bulk remove; falls cursor/anchor back to surviving anchor
-   *  or first remaining id. No-op on empty `ids`.
+  /** Bulk remove; falls cursor/anchor back to surviving anchor or
+   *  first remaining id. No-op on empty `ids`.
    */
   removeIds(ids: readonly string[]): void {
     if (ids.length === 0) {
@@ -195,7 +194,7 @@ export class GridSelectionModel {
     }
   }
 
-  /** Escape (Q3): collapse back to `{activeCursor}`. No-op on empty selection. */
+  /** Escape: collapse back to `{activeCursor}`. No-op on empty selection. */
   collapseToCursor(): void {
     if (this._activeCursor === null) {
       return;
@@ -206,7 +205,7 @@ export class GridSelectionModel {
     this._initialReconcileDone = true;
   }
 
-  /** Ctrl+A / Z10: select every visible id. Preserves anchor+cursor
+  /** Ctrl+A: select every visible id. Preserves anchor+cursor
    *  when still present; otherwise falls back to `anchorHint` (when
    *  present in the new set) or the first visible id. No-op on empty. */
   selectAll(visibleIds: readonly string[], anchorHint?: string | null): void {
@@ -229,11 +228,11 @@ export class GridSelectionModel {
     this._initialReconcileDone = true;
   }
 
-  /** Q4 / Z5c — reconcile against a doc-ordered set of valid ids after
-   *  a re-render. Drops missing ids; cursor falls back to anchor (when
+  /** Reconcile against a doc-ordered set of valid ids after a
+   *  re-render. Drops missing ids; cursor falls back to anchor (when
    *  survived) or first-surviving-in-doc-order; anchor inherits cursor
    *  when dropped; empty selection falls back to `fallbackFirstVisibleId`
-   *  EXCEPT on the first reconcile (D0.1) where it stays empty. Accepts
+   *  EXCEPT on the first reconcile where it stays empty. Accepts
    *  array (preferred) or Set (order degrades to iteration order). */
   reconcile(
     existingIds: readonly string[] | ReadonlySet<string>,
@@ -244,13 +243,13 @@ export class GridSelectionModel {
     const orderedExisting: readonly string[] | null = Array.isArray(existingIds)
       ? (existingIds as readonly string[])
       : null;
-    // B.1.h — drop any synthetic column id whose parent nodeId is no
-    // longer rendered. `existingSet` IS the fresh nodeId tree, so it
-    // doubles as the parent-existence check (column ids are
+    // Drop any synthetic column id whose parent nodeId is no longer
+    // rendered. `existingSet` IS the fresh nodeId tree, so it doubles
+    // as the parent-existence check (column ids are
     // `${parentId}#col/...` — see grid-selection-entry.ts).
     this._columnSel.reconcile(existingSet);
 
-    // Preserve DOCUMENT ORDER for the survivors — required for Z5c's
+    // Preserve DOCUMENT ORDER for the survivors — required for the
     // "first-surviving-in-doc-order" cursor fallback.
     const survivingOrdered: string[] = [];
     if (orderedExisting !== null) {
@@ -268,10 +267,10 @@ export class GridSelectionModel {
     }
 
     if (survivingOrdered.length === 0) {
-      // B.1.e / D0.1 — on the FIRST reconcile (freshly-opened document),
-      // skip the fallback and end up fully empty. The legacy Z5c
-      // fallback is a RECOVERY mechanism for later live-edit reconciles
-      // (user already interacted), not an INITIALISER.
+      // On the FIRST reconcile (freshly-opened document), skip the
+      // fallback and end up fully empty. The fallback is a RECOVERY
+      // mechanism for later live-edit reconciles (user already
+      // interacted), not an INITIALISER.
       if (!this._initialReconcileDone) {
         this.clearInternal();
         this._initialReconcileDone = true;
@@ -311,7 +310,7 @@ export class GridSelectionModel {
     };
   }
 
-  /** Z9 — capture fingerprints for current selection; preserves
+  /** Capture fingerprints for current selection; preserves
    *  already-captured values (selection-time semantics) and fills in
    *  fresh entries for newly-added ids. */
   captureFingerprints(freshFingerprints: ReadonlyMap<string, string>): void {
@@ -335,7 +334,7 @@ export class GridSelectionModel {
     return new Map(this._fingerprints);
   }
 
-  /** Z9 round-4 — REMAP-by-fingerprint reconcile. Thin wrapper around
+  /** REMAP-by-fingerprint reconcile. Thin wrapper around
    *  `reconcileWithFingerprintsInPlace` in grid-selection-reconcile.ts. */
   reconcileWithFingerprints(
     existingIds: readonly string[],
@@ -359,7 +358,7 @@ export class GridSelectionModel {
     this._initialReconcileDone = state.initialReconcileDone;
   }
 
-  // ---- B.1.e / Q7 / B.1.h — axis-aware column selection API ----
+  // ---- Axis-aware column selection API ----
 
   get columnIds(): ReadonlySet<string> {
     return this._columnSel.columns;
@@ -387,14 +386,14 @@ export class GridSelectionModel {
   }
 
   /** Plain click on a column header: replace set with {columnId}, clear
-   *  any row selection, set anchor + cursor. Mutual exclusion (I3). */
+   *  any row selection, set anchor + cursor. Mutual exclusion. */
   selectColumn(columnId: string): void {
     this.clearRowInternal();
     this._columnSel.replaceWith(columnId);
     this._initialReconcileDone = true;
   }
 
-  /** Idempotent column add. Clears row axis first (I3). */
+  /** Idempotent column add. Clears row axis first. */
   addColumn(columnId: string): void {
     this.clearRowInternal();
     this._columnSel.add(columnId);
@@ -407,7 +406,7 @@ export class GridSelectionModel {
     if (this._columnSel.size !== before) this._initialReconcileDone = true;
   }
 
-  /** Ctrl+Click on a column header. Clears row axis on first add (I3). */
+  /** Ctrl+Click on a column header. Clears row axis on first add. */
   toggleColumn(columnId: string): void {
     if (!this._columnSel.has(columnId)) this.clearRowInternal();
     this._columnSel.toggle(columnId);
@@ -445,25 +444,25 @@ export class GridSelectionModel {
     this._columnSel.clear();
   }
 
-  /** B.1.e / Q7 — drop column entries whose parent nodeId no longer
-   *  exists. Column ids are synthesized (`${parent}#col/...`) so the
-   *  engine never emits them directly; the parent-existence check is
-   *  the only reconcile criterion. */
+  /** Drop column entries whose parent nodeId no longer exists. Column
+   *  ids are synthesized (`${parent}#col/...`) so the engine never
+   *  emits them directly; the parent-existence check is the only
+   *  reconcile criterion. */
   reconcileColumns(existingParentIds: ReadonlySet<string>): void {
     this._columnSel.reconcile(existingParentIds);
   }
 
-  /** B.1.h — debug invariant check (I3 + I4 + C1/C2). Throws on
-   *  violation. Tests call this directly after every mutation. */
+  /** Debug invariant check. Throws on violation. Tests call this
+   *  directly after every mutation. */
   assertInvariants(): void {
     if (this._nodeIds.size > 0 && this._columnSel.size > 0) {
-      throw new Error('GridSelectionModel I3: rows and columns both non-empty');
+      throw new Error('GridSelectionModel: rows and columns both non-empty');
     }
     this._columnSel.assertInvariants();
   }
 
-  /** B.1.e / D0.1 — reset to fresh-open state; next reconcile behaves
-   *  like the very first (no fallback to first visible id). */
+  /** Reset to fresh-open state; next reconcile behaves like the very
+   *  first (no fallback to first visible id). */
   clear(): void {
     this.clearInternal();
     this._fingerprints = new Map();

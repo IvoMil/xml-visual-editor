@@ -1,13 +1,11 @@
 /**
- * B.1.e / Q9 — renderer-side bridge between a (row, column) cell and the
- * axis-aware selection class. Wraps `selectionAxisForCell` with the
- * column-id synthesis so the table-region emitters do not need to know
- * how column ids are shaped.
+ * Renderer-side bridge between a (row, column) cell and the axis-aware
+ * selection class. Wraps `selectionAxisForCell` with the column-id
+ * synthesis so the table-region emitters do not need to know how
+ * column ids are shaped.
  *
  * Kept as a tiny helper module so the emitter files stay focussed on
  * HTML assembly and remain comfortably under the 500-line ceiling.
- *
- * Refs: docs/designs/DESIGN_GRID_ALIGNMENT.md §9.0 Q7, Q9.
  */
 import { GridSelectionModel } from '../model/grid-selection';
 import {
@@ -64,8 +62,8 @@ export function axisClassSuffix(axis: AxisClass): string {
   return axis === 'none' ? '' : ` ${axis}`;
 }
 
-/** B.1.h — suffix the `column-selected` class onto a column-header cell
- *  when its synthetic `columnId` is in the model's column set. Always
+/** Suffix the `column-selected` class onto a column-header cell when
+ *  its synthetic `columnId` is in the model's column set. Always
  *  returns a space-prefixed suffix or ''. */
 export function columnHeaderSelectedSuffix(
   columnId: string,

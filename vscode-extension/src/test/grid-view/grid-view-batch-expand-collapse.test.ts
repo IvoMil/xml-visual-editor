@@ -7,23 +7,23 @@ import {
 import { GridSelectionSnapshot } from '../../grid-view/model/grid-selection';
 
 /**
- * B.6.e — Batch `+` / `-` expand/collapse over the multi-select set.
+ * Batch `+` / `-` expand/collapse over the multi-select set.
  *
  * The canonical controller owns a pure helper (`batchToggleExpand`) that
  * returns the ids whose expansion state would flip under direction-guarded
- * semantics (Q5). The webview glue forwards those ids to the host, which
+ * semantics. The webview glue forwards those ids to the host, which
  * owns `GridNode.isExpanded` and performs a single atomic re-render.
  *
  * These tests drive the controller method directly plus a FakeHost that
  * simulates the host loop, so selection integrity + atomicity can be
  * verified end-to-end without a real webview.
  *
- * Locked decisions exercised here (DESIGN_GRID_MULTI_SELECT §0):
- *   - Q2: comment rows are no-ops for `+`/`-`.
- *   - Q5: direction-guarded — `+` only expands collapsed, `-` only
- *         collapses expanded; already-in-target-state is untouched.
- *   - Q6: operates on every id regardless of DOM visibility (hidden
- *         descendants still flip).
+ * Locked decisions exercised here (DESIGN_GRID_MULTI_SELECT):
+ *   - Comment rows are no-ops for `+`/`-`.
+ *   - Direction-guarded — `+` only expands collapsed, `-` only
+ *     collapses expanded; already-in-target-state is untouched.
+ *   - Operates on every id regardless of DOM visibility (hidden
+ *     descendants still flip).
  */
 
 interface FakeRowSpec {
@@ -278,7 +278,7 @@ suite('GridMouseController — batch +/- expand/collapse over multi-select', () 
     // Inject a hidden id into the selection by toggling an id the view
     // does not enumerate in getRowIds.
     ctrl.onRowClick('H', { ctrl: true, shift: false });
-    // Predicates are the host's source of truth (Q6 hook): answer for H
+    // Predicates are the host's source of truth: answer for H
     // as if it existed in the engine tree.
     const isExpanded = (id: string): boolean => {
       if (id === 'H') return false;
@@ -289,7 +289,7 @@ suite('GridMouseController — batch +/- expand/collapse over multi-select', () 
       return view.hasChildrenPredicate(id);
     };
     const changed = ctrl.batchToggleExpand('+', isExpanded, hasChildren);
-    assert.ok(changed.includes('H'), 'hidden descendant still flips (Q6)');
+    assert.ok(changed.includes('H'), 'hidden descendant still flips');
     assert.deepEqual(changed.slice().sort(), ['H', 'P', 'Q']);
   });
 
@@ -398,7 +398,8 @@ suite('GridMouseController — batch +/- expand/collapse over multi-select', () 
 });
 
 /**
- * B.6 second post-verification round — Issue X (selection growth on `+`).
+ * Selection growth on `+`: expanded nodes grow the selection to include
+ * newly-revealed direct children.
  *
  * After a batch `+` expands selected nodes, the newly-revealed direct
  * children join the selection set so a second `+` drills another level.
@@ -410,7 +411,7 @@ suite('GridMouseController — batch +/- expand/collapse over multi-select', () 
  * each parent's direct children from the new DOM and calls
  * controller.growSelection(ids). These tests cover that final step
  * directly via `growSelection` since the upstream pre-compute is a
- * pure DOM walk covered by the Issue Y helper tests.
+ * pure DOM walk covered by the table-row helper tests.
  */
 suite('GridSelectionModel + GridMouseController — selection grows to include descendants when expanded node is in the selection', () => {
   let view: FakeView;

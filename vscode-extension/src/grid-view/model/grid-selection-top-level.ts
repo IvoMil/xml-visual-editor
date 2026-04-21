@@ -1,5 +1,5 @@
 /**
- * B.1.g — `topLevelSelectedNodeIds` helper (DESIGN_GRID_ALIGNMENT.md §9.6).
+ * `topLevelSelectedNodeIds` helper.
  *
  * Given a selection set and an ancestor-lookup function, returns the
  * subset of selected node ids that have NO selected ancestor. When a

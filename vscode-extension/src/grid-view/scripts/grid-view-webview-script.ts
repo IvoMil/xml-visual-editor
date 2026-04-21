@@ -26,10 +26,10 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
     );
   }
 
-  /* B.6 second-round Issue Y discriminator: a row is a TABLE DATA ROW
-   * iff its DOM element has class 'r-trow' but NOT 't-header'. Header
-   * rows have no data-node-id so they never reach a selection anyway,
-   * but the guard keeps the predicate honest. */
+  /* Discriminator: a row is a TABLE DATA ROW iff its DOM element has
+   * class 'r-trow' but NOT 't-header'. Header rows have no
+   * data-node-id so they never reach a selection anyway, but the guard
+   * keeps the predicate honest. */
   function isTableDataRow(nodeId) {
     var el = container.querySelector(
       '.g-row[data-node-id="' + CSS.escape(nodeId) + '"]'
@@ -84,8 +84,8 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
     return out;
   }
 
-  /* Z1 / Z2 — snapshot every renderable id (.g-row[data-node-id]) in
-   * document order. Compared BEFORE/AFTER a batch '+' to compute the
+  /* Snapshot every renderable id (.g-row[data-node-id]) in document
+   * order. Compared BEFORE/AFTER a batch '+' to compute the
    * newly-revealed id delta that the selection grows into (attributes,
    * #group headers, .r-trow rows, comments — everything the DOM shows). */
   function snapshotAllRowIds() {
@@ -121,7 +121,7 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
     return out;
   }
 
-  /* Z3 / Z7 — DOM walker lives in pick-innermost-webview-js.ts; see
+  /* DOM walker lives in pick-innermost-webview-js.ts; see
    * __pickInnermostExpandedFromDom(container, treeIds). */
   function pickInnermostExpandedFromDom(treeIds) {
     return __pickInnermostExpandedFromDom(container, treeIds);
@@ -130,8 +130,8 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
   /* Pending growth state — set when the +/- handler posts a
    * batchToggleExpand. Stores the pre-batch snapshot of renderable ids.
    * After the host's updateTreeData re-render, the delta (new - old)
-   * joins the selection (Issue X / Z1). Cleared after every consumption
-   * or after any non-growth re-render. */
+   * joins the selection. Cleared after every consumption or after any
+   * non-growth re-render. */
   var pendingGrowthSnapshot = null;
 
   /** Get all selectable node elements in DOM order.
@@ -145,7 +145,7 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
 
   /** Full list of row node ids in DOM order, INCLUDING comment rows.
    *  Used for Shift-range keyboard extensions so comment rows can be
-   *  part of a multi-row selection (Q2 in DESIGN_GRID_MULTI_SELECT). */
+   *  part of a multi-row selection. */
   function getAllRowNodeIds() {
     var rows = document.querySelectorAll('#grid-container .g-row[data-node-id]');
     var ids = [];
@@ -163,8 +163,7 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
     return orderedIds.indexOf(cursor);
   }
 
-  /** Keyboard-navigate to a single node (single-select semantics for now;
-   *  B.6.c will extend this with Shift/Ctrl to use the controller). */
+  /** Keyboard-navigate to a single node (single-select semantics). */
   function navigateTo(nodes, idx) {
     if (idx < 0 || idx >= nodes.length) { return; }
     const el = nodes[idx];
@@ -290,9 +289,9 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
     });
   });
 
-  /* --- Keyboard navigation (single-cursor + B.6.c multi-select) --- */
+  /* --- Keyboard navigation (single-cursor + multi-select) --- */
   document.addEventListener('keydown', function(e) {
-    /* B.1.h — column-axis keyboard: Shift+Left/Right extends range;
+    /* Column-axis keyboard: Shift+Left/Right extends range;
      * Escape + plain Up/Down clear axes (TODO: re-enter row axis). */
     var colSnap = gridController.getSelectionSnapshot();
     if (colSnap && colSnap.columnIds && colSnap.columnIds.length > 0
@@ -314,9 +313,9 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
       }
     }
 
-    /* B.6.c: Ctrl+A / Cmd+A — select every visible row. Must bail out
-     * when the user is typing in a cell editor so the normal "select all
-     * text in the input" behaviour is preserved. */
+    /* Ctrl+A / Cmd+A — select every visible row. Must bail out when the
+     * user is typing in a cell editor so the normal "select all text in
+     * the input" behaviour is preserved. */
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey
         && (e.key === 'a' || e.key === 'A')) {
       if (__isInEditableContext(e.target)) { return; }
@@ -339,8 +338,8 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
       }
     }
 
-    /* B.6.c: Shift+Arrow / Shift+Home / Shift+End extend the range using
-     * the full ordered id list (comments INCLUDED — Q2). */
+    /* Shift+Arrow / Shift+Home / Shift+End extend the range using
+     * the full ordered id list (comments INCLUDED). */
     if (e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey
         && (e.key === 'ArrowUp' || e.key === 'ArrowDown'
             || e.key === 'Home' || e.key === 'End')) {
@@ -413,7 +412,7 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
       case '+':
       case '=':
         {
-          /* Z4 — route EVERY +/- press through the batch path (single-row
+          /* Route EVERY +/- press through the batch path (single-row
            * included) so the growth pass fires on a single selected
            * parent too. Single-row on a LEAF falls out naturally: no
            * expandable ids → nothing posted → no growth. */
@@ -428,8 +427,8 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
             var hostIdsPlus = partPlus.treeIds.concat(cellsPlus);
             if (hostIdsPlus.length > 0) {
               e.preventDefault();
-              /* Z1/Z2 — snapshot renderable ids BEFORE the host
-               * re-renders so we can compute the delta. */
+              /* Snapshot renderable ids BEFORE the host re-renders so
+               * we can compute the delta. */
               pendingGrowthSnapshot = snapshotAllRowIds();
               vscode.postMessage({
                 type: 'batchToggleExpand',
@@ -450,8 +449,8 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
               idsMinus = idsMinus.filter(isRowInDom);
             }
             var partMinus = partitionByTableRow(idsMinus);
-            /* Z3 — symmetric with '+': collapse only the INNERMOST
-             * expanded rows so each '-' press undoes one '+' press. */
+            /* Symmetric with '+': collapse only the INNERMOST expanded
+             * rows so each '-' press undoes one '+' press. */
             var innermostTree = pickInnermostExpandedFromDom(partMinus.treeIds);
             pendingGrowthSnapshot = null;
             var cellsMinus = collectCellChildIdsToFlip(partMinus.tableRowIds, '-');
@@ -486,8 +485,8 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
       case 'updateTreeData': {
         if (container && message.html) {
           container.innerHTML = message.html;
-          /* Z1/Z2 — grow the selection into the delta between the
-           * pre-batch snapshot and the just-rendered DOM. Covers every
+          /* Grow the selection into the delta between the pre-batch
+           * snapshot and the just-rendered DOM. Covers every
            * newly-revealed id kind (attributes, #group, .r-trow,
            * comments, text rows). MUST happen BEFORE reapply so the
            * new ids get the .selected class in the same DOM pass. */
@@ -513,10 +512,10 @@ export const GRID_VIEW_WEBVIEW_SCRIPT = `
         break;
       }
       case 'reconcileSelection': {
-        /* Q4 / Z9: host computed new existingIds + per-id fingerprints
-         * after a re-render. Prefer the fingerprint path when a
-         * fingerprint object arrived — drops ids whose path still
-         * exists but whose content changed. */
+        /* Host computed new existingIds + per-id fingerprints after a
+         * re-render. Prefer the fingerprint path when a fingerprint
+         * object arrived — drops ids whose path still exists but whose
+         * content changed. */
         var ids = Array.isArray(message.existingIds) ? message.existingIds : [];
         var fallback = message.fallbackFirstVisibleId == null
           ? null : message.fallbackFirstVisibleId;

@@ -6,16 +6,14 @@ import { makeNodeData } from './grid-renderer.test-helpers';
 import { GridNode } from '../../grid-view/model/grid-node';
 
 /**
- * B.1.c — Hybrid table rendering with chevron-bearing cells.
+ * Hybrid table rendering with chevron-bearing cells.
  *
- * Engine-side B.1.a marks same-shape repeated runs with
+ * Engine-side candidacy marks same-shape repeated runs with
  * `isHybridTableCandidate`. The webview renders such runs as a hybrid
  * table: scalar columns stay as plain text; chevron-bearing columns
  * render a `.cell-toggle` chevron. When a row's chevron cell is
  * expanded, the renderer injects a full-width `.r-trow-nested` row
  * immediately below the data row with the child's subtree.
- *
- * See docs/designs/DESIGN_GRID_ALIGNMENT.md §9.0 Q1/Q2/Q6.
  */
 suite('GridRenderer — hybrid table rendering with chevron-bearing cells', () => {
   let renderer: GridRenderer;
